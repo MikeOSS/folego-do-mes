@@ -1,4 +1,5 @@
 import { parseBRLInputToCents } from '../domain/money';
+export const MAX_SIMULATION_CENTS = 10_000_000_000;
 
 /** UI boundary: reject partial parses and unsafe numbers without changing the engine. */
 export function validateMoneyInput(value: string): number | null {
@@ -6,6 +7,6 @@ export function validateMoneyInput(value: string): number | null {
   try {
     const cents = parseBRLInputToCents(value);
     // Demonstration inputs reserve ample arithmetic headroom for all projections.
-    return cents !== null && Math.abs(cents) <= 10_000_000_000 ? cents : null;
+    return cents !== null && Math.abs(cents) <= MAX_SIMULATION_CENTS ? cents : null;
   } catch { return null; }
 }

@@ -1,4 +1,5 @@
-import { FunctionDeclaration, GoogleGenAI, Type } from '@google/genai';
+import type { FunctionDeclaration, Type as GeminiType } from '@google/genai';
+const Type = { OBJECT: 'OBJECT', STRING: 'STRING', NUMBER: 'NUMBER' } as Record<'OBJECT' | 'STRING' | 'NUMBER', GeminiType>;
 import {
   CertaintyLevel,
   AccountSnapshot,
@@ -9,7 +10,8 @@ import {
 import { DemoScenario } from '../data/scenarios';
 import { SimulationDelta } from '../state/useFinancialStore';
 import { formatBRL } from '../domain/money';
-import { formatShortDatePT } from '../domain/date';
+import { formatShortDatePT, isValidISODate } from '../domain/date';
+import { MAX_SIMULATION_CENTS } from '../lib/financial-input';
 
 const STORAGE_KEY_GEMINI_API = 'folego_do_mes_gemini_api_key_v1';
 
@@ -317,6 +319,18 @@ function executeToolCallsOnStore(
 ): ExecutedToolAction[] {
   const executed: ExecutedToolAction[] = [];
 
+  // Validate the complete remote batch before its first store mutation.
+  for (const call of functionCalls) {
+    const args = call.args ?? {};
+    if (call.name === 'update_entry_amount' || call.name === 'add_simulated_entry') {
+      const amount = Number(call.name === 'update_entry_amount' ? args.newAmountBRL ?? 0 : args.amountBRL ?? 150);
+      const cents = Math.round(amount * 100);
+      if (!Number.isSafeInteger(cents) || cents <= 0 || cents > MAX_SIMULATION_CENTS) throw new Error('Valor de simulação inválido');
+    }
+    const date = call.name === 'postpone_entry_date' ? String(args.newDateISO ?? '') : call.name === 'add_simulated_entry' ? String(args.dateISO ?? contextPack.referenceDate) : null;
+    if (date !== null && !isValidISODate(date)) throw new Error('Data de simulação inválida');
+  }
+
   for (const fc of functionCalls) {
     const name = fc.name ?? '';
     const args = (fc.args ?? {}) as Record<string, unknown>;
@@ -407,8 +421,10 @@ function executeToolCallsOnStore(
 export async function askGeminiFinancialAdvisor(
   userPrompt: string,
   contextPack: FinancialContextPack,
-  mutators: StoreMutatorsForGemini
+  mutators: StoreMutatorsForGemini,
+  signal?: AbortSignal,
 ): Promise<GeminiAdvisorResponse> {
+  signal?.throwIfAborted();
   const clientKey = getStoredGeminiApiKey();
 
   const fullPrompt = `CONTEXT PACK JSON (FONTE DA VERDADE DO MOTOR DETERMINÍSTICO):
@@ -424,16 +440,20 @@ Instruções:
   // 1) Chamada direta com @google/genai se o usuário tiver configurado a chave
   if (clientKey) {
     try {
+      const { GoogleGenAI } = await import('@google/genai');
       const ai = new GoogleGenAI({ apiKey: clientKey });
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: fullPrompt,
         config: {
+          abortSignal: AbortSignal.any([AbortSignal.timeout(15_000), ...(signal ? [signal] : [])]),
           systemInstruction: SYSTEM_INSTRUCTION,
           tools: [{ functionDeclarations: GEMINI_SIMULATOR_TOOLS }],
           temperature: 0.2,
         },
       });
+
+      signal?.throwIfAborted();
 
       const calls = (response.functionCalls ?? []).map((fc) => ({
         name: fc.name,
@@ -454,6 +474,7 @@ Instruções:
         'gemini-2.5-flash'
       );
     } catch (err) {
+      signal?.throwIfAborted();
       console.warn('Falha na chamada direta Gemini API, tentando fallback:', err);
     }
   }
@@ -461,6 +482,7 @@ Instruções:
   // 2) Tenta a rota Serverless /api/gemini (caso GEMINI_API_KEY esteja configurada na Vercel)
   try {
     const res = await fetch('/api/gemini', {
+      signal: AbortSignal.any([AbortSignal.timeout(15_000), ...(signal ? [signal] : [])]),
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -475,6 +497,7 @@ Instruções:
         functionCalls?: Array<{ name?: string; args?: Record<string, unknown> }>;
         model?: string;
       };
+      signal?.throwIfAborted();
       const executedTools = executeToolCallsOnStore(
         data.functionCalls ?? [],
         contextPack,
@@ -495,10 +518,12 @@ Instruções:
       }
     }
   } catch {
+    signal?.throwIfAborted();
     // Continua para o motor híbrido local caso offline ou sem env var na Vercel
   }
 
   // 3) Interpretador de Intenção + Consultor Contextual Determinístico (Sem risco de falha na demo)
+  signal?.throwIfAborted();
   return runLocalHybridAdvisorWithTools(userPrompt, contextPack, mutators);
 }
 

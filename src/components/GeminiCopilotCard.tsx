@@ -1,4 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { FeedbackState } from './ui/FeedbackState';
+import { SourceNote } from './ui/SourceNote';
+import { PRODUCT } from '../lib/product';
 import {
   Bot,
   Check,
@@ -39,6 +42,16 @@ export const GeminiCopilotCard: React.FC = () => {
   const [hasCustomKey, setHasCustomKey] = useState(
     () => getStoredGeminiApiKey().length > 10
   );
+  const controlId = useId();
+  const requestRef = useRef<AbortController | null>(null);
+  const sendingRef = useRef(false);
+  const scenarioRef = useRef(activeScenario.id);
+  scenarioRef.current = activeScenario.id;
+  const [lastPrompt, setLastPrompt] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+  const [responseContext, setResponseContext] = useState('');
+  const [online, setOnline] = useState(()=>navigator.onLine);
 
   const contextPack = useMemo(
     () =>
@@ -50,27 +63,69 @@ export const GeminiCopilotCard: React.FC = () => {
       ),
     [activeScenario, activeProjection, simulationDelta, effectiveSnapshot]
   );
+  const contextSignature = JSON.stringify(contextPack);
+  const signatureRef = useRef(contextSignature);
+  signatureRef.current = contextSignature;
 
   // Ao trocar de cenário, limpa a resposta anterior para incentivar nova análise ou gera resumo contextual
   useEffect(() => {
+    requestRef.current?.abort();
+    sendingRef.current = false;
+    setIsLoading(false);
     setAdvisorResponse(null);
+    setError(null);
+    setLastPrompt('');
+    setAnnouncement(`Cenário de ${activeScenario.personaName}. Faça uma nova consulta sobre estes dados fictícios.`);
+    return () => requestRef.current?.abort();
   }, [activeScenario.id]);
+
+  useEffect(()=>{
+    const update = () => setOnline(navigator.onLine);
+    window.addEventListener('online',update);
+    window.addEventListener('offline',update);
+    return ()=>{window.removeEventListener('online',update);window.removeEventListener('offline',update);};
+  },[]);
 
   const handleRunPrompt = async (textToRun: string) => {
     const trimmed = textToRun.trim();
-    if (!trimmed || isLoading) return;
+    if (!trimmed || sendingRef.current) return;
 
+    sendingRef.current = true;
+    const controller = new AbortController();
+    requestRef.current = controller;
+    const requestScenario = activeScenario.id;
+    const requestSignature = contextSignature;
+    let appliedTools = false;
+    const assertCurrent = () => {
+      controller.signal.throwIfAborted();
+      if (scenarioRef.current !== requestScenario || signatureRef.current !== requestSignature) throw new Error('Contexto alterado');
+    };
     setIsLoading(true);
+    setAdvisorResponse(null);
+    setError(null);
+    setLastPrompt(trimmed);
+    setAnnouncement('Consultando orientação para o cenário atual.');
     try {
       const response = await askGeminiFinancialAdvisor(trimmed, contextPack, {
-        updateEntryOverride: (entryId, patch) =>
-          updateEntryOverride(entryId, patch),
-        addSimulatedEntry: (entry) => addSimulatedEntry(entry),
-        resetAllSimulations: () => resetAllSimulations(),
-      });
+        updateEntryOverride: (entryId, patch) => { assertCurrent(); appliedTools=true; updateEntryOverride(entryId, patch); },
+        addSimulatedEntry: (entry) => { assertCurrent(); appliedTools=true; addSimulatedEntry(entry); },
+        resetAllSimulations: () => { assertCurrent(); appliedTools=true; resetAllSimulations(); },
+      },controller.signal);
+      if (!appliedTools) assertCurrent();
+      if (controller.signal.aborted || scenarioRef.current !== requestScenario) return;
       setAdvisorResponse(response);
+      setResponseContext(requestSignature);
+      setAnnouncement(response.mode === 'hybrid-local-engine' ? 'Resposta local pronta. Gemini indisponível nesta consulta.' : 'Resposta do Gemini pronta.');
+    } catch {
+      if (!controller.signal.aborted) {
+        setError('Não foi possível concluir a consulta com os dados atuais. Sua pergunta foi preservada. Confira o cenário e tente novamente.');
+        setAnnouncement('');
+      }
     } finally {
-      setIsLoading(false);
+      if (requestRef.current === controller && !controller.signal.aborted) {
+        sendingRef.current=false;
+        setIsLoading(false);
+      }
     }
   };
 
@@ -78,7 +133,6 @@ export const GeminiCopilotCard: React.FC = () => {
     e.preventDefault();
     if (!promptInput.trim()) return;
     const text = promptInput;
-    setPromptInput('');
     void handleRunPrompt(text);
   };
 
@@ -114,6 +168,7 @@ export const GeminiCopilotCard: React.FC = () => {
 
   return (
     <section
+      id="consultor"
       aria-label="Consultor Financeiro Gemini com Function Calling"
       className="surface-raised p-5 sm:p-6 space-y-4 border-t-2 border-t-[#0064fd]"
     >
@@ -126,14 +181,14 @@ export const GeminiCopilotCard: React.FC = () => {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base font-bold tracking-[-0.02em] text-[#151a28]">
-                Copiloto Gemini · Simulação Inteligente
+                {PRODUCT.advisor} · Orientação e simulação
               </h2>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#0064fd]/10 text-brand text-xs font-mono-tabular font-semibold">
-                Gemini quando disponível · modo local alternativo
+              <span data-testid="advisor-status" className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#0064fd]/10 text-brand text-xs font-mono-tabular font-semibold">
+                {!online ? 'Sem conexão' : isLoading ? 'Consultando' : error ? 'Consulta não concluída' : advisorResponse?.mode === 'hybrid-local-engine' ? 'Resposta local · sem IA generativa' : advisorResponse ? 'Última resposta: Gemini' : 'Aguardando consulta'}
               </span>
             </div>
             <p className="text-xs text-muted">
-              Arquitetura híbrida: o motor calcula os centavos exatos e o Gemini explica ou executa simulações por comando natural.
+              Entenda seu fôlego e teste possibilidades. O motor calcula os valores; o Gemini explica quando disponível. Cenário atual: {activeScenario.personaName}.
             </p>
           </div>
         </div>
@@ -143,6 +198,8 @@ export const GeminiCopilotCard: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowContextPack((prev) => !prev)}
+            aria-expanded={showContextPack}
+            aria-controls={`${controlId}-context`}
             className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
               showContextPack
                 ? 'bg-[#151a28] text-white border-[#151a28]'
@@ -157,6 +214,8 @@ export const GeminiCopilotCard: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowKeyModal((prev) => !prev)}
+            aria-expanded={showKeyModal}
+            aria-controls={`${controlId}-key`}
             className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
               hasCustomKey
                 ? 'bg-[#2fc750]/12 text-[#168030] border-[#2fc750]/30'
@@ -173,6 +232,7 @@ export const GeminiCopilotCard: React.FC = () => {
       {/* Configurador Rápido de API Key do Google AI Studio */}
       {showKeyModal && (
         <form
+          id={`${controlId}-key`}
           onSubmit={handleSaveApiKey}
           className="p-3.5 rounded-xl bg-[#f8f9fc] border border-[#0064fd]/20 space-y-2.5 text-xs"
         >
@@ -184,6 +244,7 @@ export const GeminiCopilotCard: React.FC = () => {
               href="https://aistudio.google.com/apikey"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Gerar chave no AI Studio (abre em nova aba)"
               className="text-brand font-medium hover:underline"
             >
               Gerar chave gratuita no AI Studio →
@@ -192,8 +253,10 @@ export const GeminiCopilotCard: React.FC = () => {
           <p className="text-muted leading-relaxed">
             Se a variável <code className="font-mono-tabular">GEMINI_API_KEY</code> estiver configurada na Vercel ou se você colar sua chave aqui (salva apenas na aba atual), as chamadas usam <code className="font-mono-tabular">gemini-2.5-flash</code> ao vivo. Sem chave, o modo híbrido local garante funcionamento 100% contínuo na apresentação.
           </p>
-          <div className="flex items-center gap-2">
+          <label htmlFor={`${controlId}-api-key`} className="block font-semibold">Chave da API Gemini</label>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <input
+              id={`${controlId}-api-key`}
               type="password"
               value={apiKeyDraft}
               onChange={(e) => setApiKeyDraft(e.target.value)}
@@ -212,10 +275,10 @@ export const GeminiCopilotCard: React.FC = () => {
 
       {/* Inspetor de Context Pack JSON (Transparência Técnica para a Banca) */}
       {showContextPack && (
-        <div className="p-3.5 rounded-xl bg-[#151a28] text-slate-200 space-y-2 text-xs overflow-hidden">
+        <div id={`${controlId}-context`} className="p-3.5 rounded-xl bg-[#151a28] text-slate-200 space-y-2 text-xs overflow-hidden">
           <div className="flex items-center justify-between text-xs text-slate-400 border-b border-white/10 pb-2">
             <span className="font-mono-tabular font-semibold text-[#2fc750]">
-              CONTEXT PACK FECHADO · ENVIADO AO GEMINI-2.5-FLASH
+              DADOS ATUAIS DO CENÁRIO · CONTEXT PACK
             </span>
             <span>Cálculo financeiro pelo motor</span>
           </div>
@@ -242,8 +305,12 @@ export const GeminiCopilotCard: React.FC = () => {
       </div>
 
       {/* Campo de Linguagem Natural */}
+      <SourceNote referenceDate={contextPack.referenceDate} />
+      <label htmlFor={`${controlId}-prompt`} className="block text-sm font-semibold">Pergunte ao consultor</label>
       <form onSubmit={handleFormSubmit} className="flex flex-col sm:flex-row sm:items-center gap-2">
         <input
+          id={`${controlId}-prompt`}
+          aria-describedby={`${controlId}-hint`}
           type="text"
           value={promptInput}
           onChange={(e) => setPromptInput(e.target.value)}
@@ -269,10 +336,17 @@ export const GeminiCopilotCard: React.FC = () => {
           )}
         </button>
       </form>
+      <p id={`${controlId}-hint`} className="text-xs text-muted">Enter envia. A pergunta permanece no campo. Cada consulta substitui a resposta anterior; mudar de cenário inicia uma nova análise. Simulações não alteram pagamentos reais.</p>
+      <p role="status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</p>
+      {isLoading && <FeedbackState kind="loading">Analisando o cenário. Você pode continuar lendo a página.</FeedbackState>}
+      {error && <FeedbackState kind="error" onRetry={()=>void handleRunPrompt(lastPrompt)}>{error}</FeedbackState>}
 
       {/* Resposta Estruturada + Function Calls Executadas */}
       {advisorResponse && (
-        <div className="p-4 rounded-xl bg-[#f8f9fc] border border-[#151a28]/8 space-y-3 animate-fadeIn">
+        <div role="log" aria-label="Conversa com o consultor" aria-relevant="additions" aria-live="off" className="p-4 rounded-xl bg-[#f8f9fc] border border-[#151a28]/8 space-y-3">
+          <p className="text-sm text-muted"><strong>Sua pergunta:</strong> {lastPrompt}</p>
+          <p className="text-sm font-semibold">{advisorResponse.mode === 'hybrid-local-engine' ? 'Orientação local do motor; não é uma resposta gerada por IA.' : 'Resposta gerada por IA com base no cenário enviado.'}</p>
+          {responseContext !== contextSignature && <p className="text-sm text-warning-ink">A projeção mudou após o envio desta pergunta. Confira os valores atualizados no painel antes de decidir.</p>}
           {/* Badges das Function Calls acionadas pelo Gemini */}
           {advisorResponse.executedTools.length > 0 && (
             <div className="space-y-1.5">
