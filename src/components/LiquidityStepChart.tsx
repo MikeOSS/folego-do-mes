@@ -1,27 +1,18 @@
 import React, { useMemo } from 'react';
-import {
-  AlertOctagon,
-  AlertTriangle,
-  Calendar,
-  Compass,
-  Info,
-  Zap,
-} from 'lucide-react';
 import { useFinancialStore } from '../state/useFinancialStore';
 import { DailyProjection } from '../domain/types';
 import { formatBRL } from '../domain/money';
 import { formatShortDatePT, getWeekdayShortPT } from '../domain/date';
+import { CurrencyDisplay } from './CurrencyDisplay';
 
 const SVG_WIDTH = 760;
-const SVG_HEIGHT = 250;
+const SVG_HEIGHT = 230;
 const PAD_LEFT = 14;
-const PAD_RIGHT = 64;
-const PAD_TOP = 36;
-const PAD_BOTTOM = 32;
+const PAD_RIGHT = 52;
+const PAD_TOP = 24;
+const PAD_BOTTOM = 28;
 
-function buildStepAfterPath(
-  points: { x: number; y: number }[]
-): string {
+function buildStepAfterPath(points: { x: number; y: number }[]): string {
   if (points.length === 0) return '';
   let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
   for (let i = 1; i < points.length; i++) {
@@ -105,7 +96,7 @@ export const LiquidityStepChart: React.FC = () => {
     const rawMax = Math.max(...allValues, 50_000);
     const span = Math.max(10_000, rawMax - rawMin);
     const domainMin = rawMin < 0 ? rawMin - span * 0.14 : -span * 0.12;
-    const domainMax = rawMax + span * 0.15;
+    const domainMax = rawMax + span * 0.14;
     const totalRange = domainMax - domainMin;
 
     const getX = (dayIndex: number) =>
@@ -163,188 +154,142 @@ export const LiquidityStepChart: React.FC = () => {
 
   if (alertStatus === 'INSUFFICIENT_DATA' || !chartGeometry) {
     return (
-      <section className="tactile-card rounded-[12px] p-5 sm:p-6">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#475869]">
-              Horizonte de Liquidez (30 Dias)
-            </span>
-            <h2 className="text-base sm:text-lg font-bold text-[#091521]">
-              Curva de Fôlego aguardando confirmação de saldo
-            </h2>
-          </div>
-        </div>
-        <div className="rounded-[8px] border border-dashed border-[#B8C5D1] bg-[#F4F6F8] p-6 text-center space-y-2">
-          <Compass className="w-8 h-8 text-[#475869] mx-auto" />
-          <p className="text-sm font-semibold text-[#091521]">
-            Não desenhamos projeções sem dados confiáveis de saldo inicial
-          </p>
-          <p className="text-xs text-[#475869] max-w-md mx-auto">
-            Informe um saldo livre no painel acima para destravar a simulação visual dos
-            degraus de saldo.
-          </p>
-        </div>
+      <section className="surface-raised p-6 sm:p-7 space-y-3">
+        <span className="label-caps">Evolução do saldo · 30 dias</span>
+        <h2 className="text-base sm:text-lg font-semibold text-[#151a28]">
+          Projeção aguardando confirmação de saldo
+        </h2>
+        <p className="text-sm text-[rgba(21,26,40,0.62)] leading-relaxed">
+          Informe um saldo disponível no painel lateral para visualizar a evolução dia a dia
+          dos próximos compromissos.
+        </p>
       </section>
     );
   }
 
   const hasEstimatedDivergence = metrics.totalEstimatedOutflowsCents > 0;
   const hasUncertainInflows = metrics.totalUncertainInflowsCents > 0;
-  const hasDeficit = metrics.firstShortfallDate !== null;
+  const activeEntriesInInspectedDay = inspectedDay
+    ? inspectedDay.entries.filter((e) => e.eligibility === 'included').length
+    : 0;
 
   return (
     <section
-      aria-label="Gráfico de evolução do saldo em degraus"
-      className="tactile-card rounded-[12px] p-4 sm:p-6 space-y-4"
+      aria-label="Evolução do saldo nos próximos 30 dias"
+      className="surface-raised p-6 sm:p-7 space-y-5"
     >
-      {/* Cabeçalho + Legenda Técnica de Dupla Codificação (Acessível para Daltonismo) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#DCE3EA] pb-3">
+      {/* Topo Integrado: Leitor Vivo do Dia Inspecionado + Legenda Limpa */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-[#475869]">
-              Curva de Fôlego • Patamares Diários
-            </span>
-            {simulationDelta.hasChanges && (
-              <span className="px-1.5 py-0.5 rounded-[4px] bg-indigo-50 border border-indigo-200 text-indigo-700 font-mono-tabular text-[10px] font-bold uppercase">
-                Comparando c/ Original
+          <span className="label-caps">
+            Evolução do saldo · Próximos 30 dias
+          </span>
+
+          {inspectedDay && (
+            <div className="mt-1.5 flex flex-wrap items-baseline gap-2.5">
+              <span
+                className={`text-2xl sm:text-3xl font-bold tracking-tight ${
+                  inspectedDay.closingProjectedCents < 0
+                    ? 'text-[#e04545]'
+                    : 'text-[#151a28]'
+                }`}
+              >
+                <CurrencyDisplay
+                  cents={inspectedDay.closingProjectedCents}
+                  showPlusSign={inspectedDay.closingProjectedCents > 0}
+                />
               </span>
-            )}
-          </div>
-          <h2 className="text-base sm:text-lg font-bold text-[#091521]">
-            Evolução do Saldo nos Próximos 30 Dias
-          </h2>
+
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#f0f2f7] text-[12px] font-medium text-[rgba(21,26,40,0.72)]">
+                {inspectedDay.dayIndex === 0
+                  ? 'Hoje'
+                  : `${formatShortDatePT(inspectedDay.date)} · ${getWeekdayShortPT(
+                      inspectedDay.date
+                    )}`}
+              </span>
+            </div>
+          )}
+
+          {inspectedDay && (
+            <p className="text-xs text-[rgba(21,26,40,0.58)] mt-1">
+              {inspectedDay.intradayTimingRisk ? (
+                <span className="text-[#a36200] font-medium">
+                  Atenção ao horário: saídas do dia superam o saldo da manhã (mínimo{' '}
+                  {formatBRL(inspectedDay.intradayMinCents)}) antes da entrada.
+                </span>
+              ) : activeEntriesInInspectedDay > 0 ? (
+                <span>
+                  {activeEntriesInInspectedDay} movimentação(ões) considerada(s) nesta data
+                  {hasEstimatedDivergence
+                    ? ` · Só confirmados: ${formatBRL(
+                        inspectedDay.closingConfirmedCents,
+                        { showPlusSign: true }
+                      )}`
+                    : ''}
+                </span>
+              ) : (
+                <span>
+                  Sem movimentações nesta data
+                  {hasEstimatedDivergence
+                    ? ` · Só confirmados: ${formatBRL(
+                        inspectedDay.closingConfirmedCents,
+                        { showPlusSign: true }
+                      )}`
+                    : ''}
+                </span>
+              )}
+            </p>
+          )}
         </div>
 
-        {/* Legenda com Forma + Traço */}
-        <div className="flex flex-wrap items-center gap-3 text-xs text-[#475869]">
-          <span className="inline-flex items-center gap-1.5 font-medium">
-            <span className="w-4 h-0.5 bg-[#00875A] inline-block" />
-            <span>Saldo Projetado</span>
+        {/* Legenda Minimalista */}
+        <div className="flex flex-wrap items-center gap-3 text-xs text-[rgba(21,26,40,0.6)]">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="w-3.5 h-0.5 bg-[#0064fd] rounded-full inline-block" />
+            <span>Saldo projetado</span>
           </span>
 
           {hasEstimatedDivergence && (
-            <span className="inline-flex items-center gap-1.5 font-medium">
-              <span className="w-4 h-0 border-t-2 border-dashed border-[#475869] inline-block" />
-              <span>Só Confirmados</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-3.5 h-0 border-t-2 border-dashed border-[rgba(21,26,40,0.45)] inline-block" />
+              <span>Só confirmados</span>
             </span>
           )}
 
           {hasUncertainInflows && (
-            <span className="inline-flex items-center gap-1.5 font-medium">
-              <span className="w-4 h-0 border-t-2 border-dotted border-[#0052CC] inline-block" />
-              <span>C/ Receb. Incerto</span>
-            </span>
-          )}
-
-          {hasDeficit && (
-            <span className="inline-flex items-center gap-1.5 font-semibold text-[#B91C1C]">
-              <span className="w-3 h-3 rounded-[2px] bg-rose-100 border border-rose-500 inline-block" />
-              <span>Zona de Déficit (&lt; R$ 0)</span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-3.5 h-0 border-t-2 border-dotted border-[#2fc750] inline-block" />
+              <span>C/ receb. incerto</span>
             </span>
           )}
         </div>
       </div>
 
-      {/* HUD Fixo do Dia Inspecionado (Zero colisão com o dedo no mobile!) */}
-      {inspectedDay && (
-        <div className="rounded-[8px] bg-[#EEF2F5] border border-[#DCE3EA] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5">
-            <div className="px-2.5 py-1 rounded-[5px] bg-[#061826] text-white font-mono-tabular text-xs font-bold uppercase">
-              {formatShortDatePT(inspectedDay.date)} ({getWeekdayShortPT(inspectedDay.date)})
-            </div>
-            <div className="text-xs text-[#475869]">
-              {inspectedDay.dayIndex === 0 ? (
-                <span className="font-semibold text-[#091521]">Hoje (Ponto de partida)</span>
-              ) : inspectedDay.entries.filter((e) => e.eligibility === 'included').length >
-                0 ? (
-                <span>
-                  <strong className="text-[#091521]">
-                    {inspectedDay.entries.filter((e) => e.eligibility === 'included').length}{' '}
-                    movimentação(ões)
-                  </strong>{' '}
-                  neste dia
-                </span>
-              ) : (
-                <span>Sem movimentações (patamar mantido)</span>
-              )}
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono-tabular">
-            <div>
-              <span className="text-[#475869] mr-1">Projetado:</span>
-              <strong
-                className={
-                  inspectedDay.closingProjectedCents < 0
-                    ? 'text-[#B91C1C] font-bold'
-                    : 'text-[#00875A] font-bold'
-                }
-              >
-                {formatBRL(inspectedDay.closingProjectedCents, { showPlusSign: true })}
-              </strong>
-            </div>
-
-            {hasEstimatedDivergence && (
-              <div>
-                <span className="text-[#475869] mr-1">Só Firme:</span>
-                <strong className="text-[#091521]">
-                  {formatBRL(inspectedDay.closingConfirmedCents, { showPlusSign: true })}
-                </strong>
-              </div>
-            )}
-
-            {inspectedDay.intradayTimingRisk && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[4px] bg-amber-100 border border-amber-400 text-[#92400E] font-bold text-[11px]">
-                <Zap className="w-3 h-3" />
-                Mín. manhã: {formatBRL(inspectedDay.intradayMinCents)}
-              </span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Gráfico SVG Step-After com Hachura Arquitetônica abaixo de R$ 0 */}
+      {/* Gráfico SVG Step-After Limpo e Escultural */}
       <figure className="relative select-none">
         <figcaption className="sr-only">
-          Gráfico de evolução do saldo em degraus para 30 dias. Menor saldo projetado:{' '}
+          Gráfico de evolução do saldo para 30 dias. Menor saldo projetado:{' '}
           {formatBRL(metrics.lowestProjectedBalanceCents)} em{' '}
           {formatShortDatePT(metrics.lowestProjectedBalanceDate)}.
         </figcaption>
 
         <svg
           viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
-          className="w-full h-[210px] sm:h-[245px] overflow-visible touch-pan-y"
+          className="w-full h-[195px] sm:h-[220px] overflow-visible touch-pan-y"
           role="img"
-          aria-label="Curva de Fôlego em degraus"
+          aria-label="Evolução do saldo por datas"
         >
           <defs>
-            {/* Hachura diagonal arquitetônica para Zona de Déficit (< R$ 0) */}
-            <pattern
-              id="deficit-hatch-pattern"
-              width="8"
-              height="8"
-              patternTransform="rotate(45 0 0)"
-              patternUnits="userSpaceOnUse"
-            >
-              <rect width="8" height="8" fill="#FEF2F2" fillOpacity="0.9" />
-              <line
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="8"
-                stroke="#DC2626"
-                strokeWidth="1.5"
-                strokeOpacity="0.28"
-              />
-            </pattern>
-
-            {/* Gradiente limpo para área positiva acima de R$ 0 */}
-            <linearGradient id="positive-area-grad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00875A" stopOpacity="0.16" />
-              <stop offset="100%" stopColor="#00875A" stopOpacity="0.02" />
+            <linearGradient id="agi-pos-area" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0064fd" stopOpacity="0.14" />
+              <stop offset="100%" stopColor="#0064fd" stopOpacity="0.0" />
             </linearGradient>
 
-            {/* Clip Acima de R$ 0 */}
+            <linearGradient id="agi-neg-area" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#e04545" stopOpacity="0.06" />
+              <stop offset="100%" stopColor="#e04545" stopOpacity="0.18" />
+            </linearGradient>
+
             <clipPath id="clip-above-zero">
               <rect
                 x="0"
@@ -354,7 +299,6 @@ export const LiquidityStepChart: React.FC = () => {
               />
             </clipPath>
 
-            {/* Clip Abaixo de R$ 0 (Zona de Insuficiência) */}
             <clipPath id="clip-below-zero">
               <rect
                 x="0"
@@ -365,107 +309,90 @@ export const LiquidityStepChart: React.FC = () => {
             </clipPath>
           </defs>
 
-          {/* Fundo sutil da Zona Abaixo de Zero */}
-          <rect
-            x={PAD_LEFT}
-            y={chartGeometry.zeroY}
-            width={chartGeometry.plotW}
-            height={Math.max(0, SVG_HEIGHT - PAD_BOTTOM - chartGeometry.zeroY)}
-            fill="#FFF5F5"
-            opacity="0.55"
-          />
-
           {/* Preenchimento Positivo Acima de R$ 0 */}
           <path
             d={chartGeometry.areaPath}
-            fill="url(#positive-area-grad)"
+            fill="url(#agi-pos-area)"
             clipPath="url(#clip-above-zero)"
           />
 
-          {/* Preenchimento Hachurado Abaixo de R$ 0 (Vale de Déficit) */}
+          {/* Preenchimento Suave Abaixo de R$ 0 */}
           <path
             d={chartGeometry.areaPath}
-            fill="url(#deficit-hatch-pattern)"
+            fill="url(#agi-neg-area)"
             clipPath="url(#clip-below-zero)"
           />
 
-          {/* Linha Fantasma do Cenário Original quando Simulação está Ativa */}
+          {/* Linha Fantasma do Original quando há Simulação Ativa */}
           {simulationDelta.hasChanges && (
             <path
               d={chartGeometry.baselineGhostPath}
               fill="none"
-              stroke="#6366F1"
-              strokeWidth="1.75"
-              strokeDasharray="3 3"
-              opacity="0.55"
+              stroke="rgba(21,26,40,0.28)"
+              strokeWidth="1.5"
+              strokeDasharray="4 4"
             />
           )}
 
-          {/* Curva Secundária: Apenas Confirmados (Tracejada) quando há Estimados */}
+          {/* Curva Só Confirmados (Tracejada) */}
           {hasEstimatedDivergence && (
             <path
               d={chartGeometry.confirmedPath}
               fill="none"
-              stroke="#475869"
-              strokeWidth="1.75"
-              strokeDasharray="6 4"
-              opacity="0.85"
+              stroke="rgba(21,26,40,0.42)"
+              strokeWidth="1.5"
+              strokeDasharray="5 4"
             />
           )}
 
-          {/* Curva Terciária: Otimista (Pontilhada Azul) quando há Recebimento Incerto */}
+          {/* Curva Otimista com Recebimento Incerto */}
           {hasUncertainInflows && (
             <path
               d={chartGeometry.optimisticPath}
               fill="none"
-              stroke="#0052CC"
-              strokeWidth="2"
+              stroke="#2fc750"
+              strokeWidth="1.75"
               strokeDasharray="2 4"
             />
           )}
 
-          {/* Régua Física de Nível Zero (R$ 0,00) */}
+          {/* Linha de Nível Zero Elegante */}
           <line
             x1={PAD_LEFT}
             y1={chartGeometry.zeroY}
-            x2={SVG_WIDTH - PAD_RIGHT + 6}
+            x2={SVG_WIDTH - PAD_RIGHT}
             y2={chartGeometry.zeroY}
-            stroke="#091521"
-            strokeWidth="1.5"
+            stroke="rgba(21,26,40,0.18)"
+            strokeWidth="1"
+            strokeDasharray="4 4"
           />
-          <g
-            transform={`translate(${SVG_WIDTH - PAD_RIGHT + 8}, ${chartGeometry.zeroY - 9})`}
+          <text
+            x={SVG_WIDTH - PAD_RIGHT + 8}
+            y={chartGeometry.zeroY + 3.5}
+            fill="rgba(21,26,40,0.45)"
+            className="font-mono-tabular text-[10px] font-medium"
           >
-            <rect width="52" height="18" rx="3" fill="#091521" />
-            <text
-              x="26"
-              y="12.5"
-              textAnchor="middle"
-              fill="#FFFFFF"
-              className="font-mono-tabular text-[9.5px] font-bold"
-            >
-              R$ 0,00
-            </text>
-          </g>
+            R$ 0
+          </text>
 
-          {/* Traço Primário Sólido: Acima de Zero (Verde Liquidez) */}
+          {/* Traço Principal Acima de Zero (Azul Agi #0064fd) */}
           <path
             d={chartGeometry.projectedPath}
             fill="none"
-            stroke="#00875A"
-            strokeWidth="2.75"
+            stroke="#0064fd"
+            strokeWidth="2.5"
+            strokeLinecap="round"
             strokeLinejoin="round"
             clipPath="url(#clip-above-zero)"
           />
 
-          {/* Traço Primário Sólido: Abaixo de Zero (Crimson de Déficit) */}
+          {/* Traço Principal Abaixo de Zero (Vermelho #e04545 ou Âmbar #e8a020) */}
           <path
             d={chartGeometry.projectedPath}
             fill="none"
-            stroke={
-              alertStatus === 'PREVENTIVE_ALERT' ? '#DC2626' : '#D97706'
-            }
-            strokeWidth="3"
+            stroke={alertStatus === 'PREVENTIVE_ALERT' ? '#e04545' : '#e8a020'}
+            strokeWidth="2.5"
+            strokeLinecap="round"
             strokeLinejoin="round"
             clipPath="url(#clip-below-zero)"
           />
@@ -474,148 +401,74 @@ export const LiquidityStepChart: React.FC = () => {
           {inspectedDay && (
             <line
               x1={chartGeometry.getX(inspectedDay.dayIndex)}
-              y1={PAD_TOP - 8}
+              y1={PAD_TOP - 6}
               x2={chartGeometry.getX(inspectedDay.dayIndex)}
               y2={SVG_HEIGHT - PAD_BOTTOM}
-              stroke="#091521"
-              strokeWidth="1.25"
-              strokeDasharray="3 3"
+              stroke="#0064fd"
+              strokeWidth="1"
+              strokeOpacity="0.35"
             />
           )}
 
-          {/* Marcadores de Eventos nos Degraus com Movimentação + Callout Pins Diretos (Zero-Hover) */}
+          {/* Nós Discretos nos Dias com Movimentação */}
           {chartGeometry.projectedPoints.map(({ x, y, day }) => {
             const activeEntries = day.entries.filter(
               (e) => e.eligibility === 'included'
             );
             const isSelected = inspectedDay?.date === day.date;
-            const isFirstDeficit = day.date === metrics.firstShortfallDate;
-            const isIntraday = day.date === metrics.firstIntradayRiskDate;
-            const isLowestPositive =
-              metrics.firstShortfallDate === null &&
-              day.date === metrics.lowestProjectedBalanceDate &&
-              day.dayIndex > 0;
-            const isMajorInflow =
-              metrics.nextExpectedInflow?.entry.effectiveDate === day.date;
 
-            if (
-              activeEntries.length === 0 &&
-              day.dayIndex !== 0 &&
-              !isSelected
-            ) {
+            if (activeEntries.length === 0 && day.dayIndex !== 0 && !isSelected) {
               return null;
             }
 
-            const dotFill =
+            const dotColor =
               day.closingProjectedCents < 0
-                ? '#DC2626'
-                : isIntraday
-                  ? '#D97706'
+                ? '#e04545'
+                : day.intradayTimingRisk
+                  ? '#e8a020'
                   : day.confirmedInflowsCents > 0
-                    ? '#0052CC'
-                    : '#00875A';
-
-            // Callout Pin Direto no SVG para os vértices principais
-            const showCalloutPin =
-              isFirstDeficit || isIntraday || isLowestPositive || isMajorInflow;
-            const pinX = Math.max(
-              PAD_LEFT + 54,
-              Math.min(SVG_WIDTH - PAD_RIGHT - 54, x)
-            );
-            const pinAbove = y > PAD_TOP + 36;
-            const pinBoxY = pinAbove ? y - 28 : y + 10;
-
-            const pinLabel = isFirstDeficit
-              ? `1º Déficit • ${formatShortDatePT(day.date, 'numeric')}`
-              : isIntraday
-                ? `Mesmo Dia • ${formatShortDatePT(day.date, 'numeric')}`
-                : isLowestPositive
-                  ? `Menor • ${formatShortDatePT(day.date, 'numeric')}`
-                  : `Receb. • ${formatShortDatePT(day.date, 'numeric')}`;
-
-            const pinBg = isFirstDeficit
-              ? '#DC2626'
-              : isIntraday
-                ? '#D97706'
-                : isMajorInflow
-                  ? '#0052CC'
-                  : '#061826';
+                    ? '#2fc750'
+                    : '#0064fd';
 
             return (
               <g key={day.date}>
-                {(isSelected || isFirstDeficit) && (
-                  <circle
-                    cx={x}
-                    cy={y}
-                    r={isSelected ? 7 : 6}
-                    fill={dotFill}
-                    opacity="0.22"
-                  />
+                {isSelected && (
+                  <circle cx={x} cy={y} r={8} fill={dotColor} opacity="0.16" />
                 )}
                 <circle
                   cx={x}
                   cy={y}
-                  r={isSelected ? 4.5 : 3.5}
-                  fill="#FFFFFF"
-                  stroke={dotFill}
-                  strokeWidth="2.5"
+                  r={isSelected ? 4.5 : 3}
+                  fill="#ffffff"
+                  stroke={dotColor}
+                  strokeWidth={isSelected ? '2.5' : '2'}
                 />
-                {showCalloutPin && (
-                  <g className="pointer-events-none">
-                    <line
-                      x1={x}
-                      y1={y}
-                      x2={pinX}
-                      y2={pinAbove ? pinBoxY + 17 : pinBoxY}
-                      stroke={pinBg}
-                      strokeWidth="1"
-                      opacity="0.7"
-                    />
-                    <rect
-                      x={pinX - 50}
-                      y={pinBoxY}
-                      width="100"
-                      height="17"
-                      rx="3.5"
-                      fill={pinBg}
-                    />
-                    <text
-                      x={pinX}
-                      y={pinBoxY + 11.5}
-                      textAnchor="middle"
-                      fill="#FFFFFF"
-                      className="font-mono-tabular text-[9px] font-bold"
-                    >
-                      {pinLabel}
-                    </text>
-                  </g>
-                )}
               </g>
             );
           })}
 
-          {/* Eixo X Simplificado (Datas de referência a cada 5 dias) */}
+          {/* Datas no Eixo Horizontal */}
           {chartGeometry.projectedPoints
             .filter(
               ({ day }) =>
                 day.dayIndex === 0 ||
-                day.dayIndex % 5 === 0 ||
+                day.dayIndex % 6 === 0 ||
                 day.dayIndex === dailySeries.length - 1
             )
             .map(({ x, day }) => (
               <text
                 key={`axis-${day.date}`}
                 x={x}
-                y={SVG_HEIGHT - 8}
+                y={SVG_HEIGHT - 6}
                 textAnchor="middle"
-                fill="#475869"
-                className="font-mono-tabular text-[10px] font-medium"
+                fill="rgba(21,26,40,0.45)"
+                className="font-mono-tabular text-[10px]"
               >
                 {formatShortDatePT(day.date, 'numeric')}
               </text>
             ))}
 
-          {/* Colunas Invisíveis de Toque/Scrubbing para cada um dos 31 dias */}
+          {/* Colunas de Toque/Scrubbing */}
           {chartGeometry.projectedPoints.map(({ x, day }) => {
             const colW = chartGeometry.plotW / Math.max(1, dailySeries.length);
             return (
@@ -647,74 +500,58 @@ export const LiquidityStepChart: React.FC = () => {
         </svg>
       </figure>
 
-      {/* Pílulas Táteis de Marcos Críticos (Atalhos para Teclado e Polegar >= 40px) */}
+      {/* Pílulas Minimalistas de Marcos Importantes */}
       {milestones.length > 0 && (
-        <div className="pt-1">
-          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#475869] mb-2">
-            <Calendar className="w-3.5 h-3.5" />
-            <span>Saltar para marcos importantes na linha do tempo:</span>
-          </div>
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1">
+          {milestones.map((m) => {
+            const isSelected = inspectedDay?.date === m.date;
+            const isNegative = m.balanceCents < 0;
+            const isIntraday = m.kind === 'intraday_risk';
 
-          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
-            {milestones.map((m) => {
-              const isSelected = inspectedDay?.date === m.date;
-              const isNegative = m.balanceCents < 0;
-              const isIntraday = m.kind === 'intraday_risk';
+            const dotClass = isNegative
+              ? 'bg-[#e04545]'
+              : isIntraday
+                ? 'bg-[#e8a020]'
+                : m.kind === 'salary_recovery'
+                  ? 'bg-[#2fc750]'
+                  : 'bg-[#0064fd]';
 
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  aria-pressed={isSelected}
-                  onClick={() => {
-                    setSelectedDate(m.date);
-                    const el = document.getElementById(`ledger-day-${m.date}`);
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                  }}
-                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-[6px] border text-xs font-medium shrink-0 transition-all min-h-[40px] cursor-pointer ${
+            return (
+              <button
+                key={m.id}
+                type="button"
+                aria-pressed={isSelected}
+                onClick={() => {
+                  setSelectedDate(m.date);
+                  const el = document.getElementById(`ledger-day-${m.date}`);
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }}
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium shrink-0 transition-all cursor-pointer border ${
+                  isSelected
+                    ? 'bg-[#151a28] border-[#151a28] text-white'
+                    : 'bg-[#f8f9fc] border-[rgba(21,26,40,0.08)] text-[rgba(21,26,40,0.75)] hover:bg-[#f0f2f7]'
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
+                <span>{m.label}</span>
+                <span
+                  className={`font-tabular font-semibold ${
                     isSelected
-                      ? 'bg-[#061826] border-[#061826] text-white shadow-xs'
+                      ? 'text-white'
                       : isNegative
-                        ? 'bg-rose-50 border-rose-300 text-[#991B1B] hover:bg-rose-100'
-                        : isIntraday
-                          ? 'bg-amber-50 border-amber-300 text-[#92400E] hover:bg-amber-100'
-                          : 'bg-[#F4F6F8] border-[#DCE3EA] text-[#091521] hover:bg-[#E6ECF2]'
+                        ? 'text-[#e04545]'
+                        : 'text-[#151a28]'
                   }`}
                 >
-                  {isNegative ? (
-                    <AlertOctagon className="w-3.5 h-3.5 shrink-0" />
-                  ) : isIntraday ? (
-                    <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                  ) : null}
-                  <span>{m.label}</span>
-                  <span
-                    className={`font-mono-tabular font-bold ${
-                      isSelected
-                        ? 'text-[#00E58F]'
-                        : isNegative
-                          ? 'text-[#B91C1C]'
-                          : 'text-[#00875A]'
-                    }`}
-                  >
-                    {formatBRL(m.balanceCents)}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  {formatBRL(m.balanceCents)}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
-
-      {/* Nota Sutil de Usabilidade */}
-      <div className="flex items-center gap-1.5 text-[11px] text-[#475869]">
-        <Info className="w-3.5 h-3.5 shrink-0 text-[#0052CC]" />
-        <span>
-          Toque em qualquer ponto do gráfico ou nos botões acima para inspecionar o saldo
-          daquele dia e localizar os compromissos.
-        </span>
-      </div>
     </section>
   );
 };

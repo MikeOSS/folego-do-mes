@@ -1,17 +1,5 @@
 import React, { useState } from 'react';
-import {
-  AlertOctagon,
-  AlertTriangle,
-  CalendarClock,
-  CheckCircle2,
-  Edit3,
-  HelpCircle,
-  Lock,
-  PlusCircle,
-  RotateCcw,
-  Sparkles,
-  TrendingUp,
-} from 'lucide-react';
+import { Plus, RotateCcw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useFinancialStore } from '../state/useFinancialStore';
 import { AlertStatus } from '../domain/types';
@@ -19,48 +7,33 @@ import { formatBRL, parseBRLInputToCents } from '../domain/money';
 import { formatShortDatePT } from '../domain/date';
 import { CurrencyDisplay } from './CurrencyDisplay';
 
-const STATUS_CONFIG: Record<
+const STATUS_PILL_CONFIG: Record<
   AlertStatus,
   {
-    eyebrow: string;
-    badgeBg: string;
-    badgeBorder: string;
-    badgeText: string;
-    accentBar: string;
-    Icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    dotClass: string;
+    pillClass: string;
   }
 > = {
   NO_SHORTFALL_IDENTIFIED: {
-    eyebrow: 'SEM INSUFICIÊNCIA IDENTIFICADA',
-    badgeBg: 'bg-[#052E22]',
-    badgeBorder: 'border-[#00E58F]/40',
-    badgeText: 'text-[#00E58F]',
-    accentBar: 'bg-[#00E58F]',
-    Icon: CheckCircle2,
+    label: 'Fôlego positivo nos próximos 30 dias',
+    dotClass: 'bg-[#2fc750]',
+    pillClass: 'bg-[#2fc750]/12 text-[#168030] border-[#2fc750]/28',
   },
   CONDITIONAL_WARNING: {
-    eyebrow: 'AVISO CONDICIONAL • ATENÇÃO ÀS VARIÁVEIS',
-    badgeBg: 'bg-[#3B2106]',
-    badgeBorder: 'border-amber-400/50',
-    badgeText: 'text-amber-300',
-    accentBar: 'bg-amber-400',
-    Icon: AlertTriangle,
+    label: 'Aviso condicional · atenção às variáveis',
+    dotClass: 'bg-[#e8a020]',
+    pillClass: 'bg-[#e8a020]/12 text-[#a36200] border-[#e8a020]/30',
   },
   PREVENTIVE_ALERT: {
-    eyebrow: 'ALERTA PREVENTIVO • DÉFICIT PROJETADO',
-    badgeBg: 'bg-[#3B0D11]',
-    badgeBorder: 'border-rose-400/50',
-    badgeText: 'text-rose-300',
-    accentBar: 'bg-rose-500',
-    Icon: AlertOctagon,
+    label: 'Alerta preventivo · saldo insuficiente antes do recebimento',
+    dotClass: 'bg-[#e04545]',
+    pillClass: 'bg-[#e04545]/10 text-[#c93333] border-[#e04545]/25',
   },
   INSUFFICIENT_DATA: {
-    eyebrow: 'INFORMAÇÕES INSUFICIENTES',
-    badgeBg: 'bg-slate-800',
-    badgeBorder: 'border-slate-500/50',
-    badgeText: 'text-slate-300',
-    accentBar: 'bg-slate-400',
-    Icon: HelpCircle,
+    label: 'Informações insuficientes para conclusão segura',
+    dotClass: 'bg-slate-400',
+    pillClass: 'bg-slate-100 text-slate-600 border-slate-200',
   },
 };
 
@@ -86,8 +59,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
 
   const { alertStatus, headline, explanation, metrics, actionableHints } =
     activeProjection;
-  const cfg = STATUS_CONFIG[alertStatus];
-  const StatusIcon = cfg.Icon;
+  const pill = STATUS_PILL_CONFIG[alertStatus];
 
   const handleOpenBalanceEdit = () => {
     const current = effectiveSnapshot.availableBalanceCents;
@@ -106,168 +78,182 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
     }
   };
 
+  const isLowestNegative = metrics.lowestProjectedBalanceCents < 0;
+
   return (
     <section
       aria-label="Resumo executivo do Fôlego do Mês"
-      className="abyssal-card rounded-[12px] text-white overflow-hidden relative"
+      className="surface-raised p-6 sm:p-7 space-y-6"
     >
-      {/* Barra superior cromática semântica de 3px */}
-      <div className={`h-1 w-full ${cfg.accentBar} transition-colors duration-300`} />
-
-      <div className="p-4 sm:p-6 space-y-5">
-        {/* Linha 1: Conta Monitorada + Badge Semântico de Diagnóstico */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#00E58F]" />
-            <span className="text-xs font-medium text-slate-300">
-              {effectiveSnapshot.accountLabel}
-            </span>
-          </div>
-
-          <div
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-[5px] border text-[11px] font-mono-tabular font-bold tracking-wider uppercase ${cfg.badgeBg} ${cfg.badgeBorder} ${cfg.badgeText}`}
-          >
-            <StatusIcon className="w-3.5 h-3.5 shrink-0" />
-            <span>{cfg.eyebrow}</span>
-          </div>
-        </div>
-
-        {/* Banner de Simulação Ativa (Ghost Comparison Antes vs. Depois) */}
-        {simulationDelta.hasChanges && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="p-3 rounded-[8px] bg-indigo-950/80 border border-indigo-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5"
-          >
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-200 uppercase tracking-wider font-mono-tabular">
-                <Sparkles className="w-3.5 h-3.5 text-[#00E58F]" />
-                <span>
-                  Simulação Ativa ({simulationDelta.modifiedEntriesCount} ajuste(s)
-                  {simulationDelta.addedEntriesCount > 0
-                    ? ` + ${simulationDelta.addedEntriesCount} novo(s)`
-                    : ''}
-                  )
-                </span>
-              </div>
-              <p className="text-xs text-slate-200">
-                {simulationDelta.shortfallEliminated ? (
-                  <span>
-                    Você <strong className="text-[#00E58F]">eliminou o déficit</strong> que
-                    ocorreria em{' '}
-                    {formatShortDatePT(baselineProjection.metrics.firstShortfallDate!)}!
-                  </span>
-                ) : simulationDelta.lowestBalanceGainCents > 0 ? (
-                  <span>
-                    Sua simulação melhorou o menor saldo do mês em{' '}
-                    <strong className="text-[#00E58F]">
-                      +{formatBRL(simulationDelta.lowestBalanceGainCents)}
-                    </strong>
-                    .
-                  </span>
-                ) : (
-                  <span>
-                    Apenas simulação: nenhum pagamento ou agendamento bancário real foi
-                    alterado.
-                  </span>
-                )}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={resetAllSimulations}
-              className="self-start sm:self-center inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-[5px] bg-indigo-600 hover:bg-indigo-500 text-xs font-semibold text-white shrink-0 transition-colors cursor-pointer"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Voltar ao Real</span>
-            </button>
-          </motion.div>
-        )}
-
-        {/* Linha 2: Manchete de Diagnóstico em 3 Segundos (aria-live para acessibilidade) */}
-        <motion.div
-          key={`${activeScenario.id}-${alertStatus}`}
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.18 }}
-          aria-live="polite"
-          aria-atomic="true"
-          className="space-y-2"
+      {/* Topo: Pílula de Estado Semântico + Identificação da Conta */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span
+          className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-semibold ${pill.pillClass}`}
         >
-          <h1 className="text-lg sm:text-xl font-bold tracking-tight text-white leading-snug">
-            {headline}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-            {explanation}
-          </p>
-        </motion.div>
+          <span className={`w-2 h-2 rounded-full ${pill.dotClass}`} />
+          <span>{pill.label}</span>
+        </span>
 
-        {/* Estado Especial: Destravar quando Informações Insuficientes */}
-        {alertStatus === 'INSUFFICIENT_DATA' && !editingBalance && (
-          <div className="p-3.5 rounded-[8px] bg-[#0C2538] border border-amber-400/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="text-xs text-slate-200 space-y-0.5">
-              <p className="font-semibold text-amber-300">
-                Deseja simular o fôlego desta conta agora?
-              </p>
-              <p className="text-slate-300">
-                Informe um saldo livre hipotético para calcular a cobertura dos{' '}
-                {activeScenario.entries.length} compromissos listados.
-              </p>
-            </div>
+        <span className="text-xs text-[rgba(21,26,40,0.5)]">
+          {effectiveSnapshot.accountLabel}
+        </span>
+      </div>
+
+      {/* Feedback de Simulação Ativa (Limpo, sem caixas escuras nem ícones clichês) */}
+      {simulationDelta.hasChanges && (
+        <motion.div
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-3.5 rounded-[12px] bg-[rgba(0,100,253,0.06)] border border-[rgba(0,100,253,0.22)] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+        >
+          <div className="text-xs text-[#151a28] space-y-0.5">
+            <p className="font-semibold text-[#0064fd]">
+              Modo simulação ativo ({simulationDelta.modifiedEntriesCount} ajuste(s)
+              {simulationDelta.addedEntriesCount > 0
+                ? ` + ${simulationDelta.addedEntriesCount} novo(s)`
+                : ''}
+              )
+            </p>
+            <p className="text-[rgba(21,26,40,0.68)]">
+              {simulationDelta.shortfallEliminated ? (
+                <span>
+                  O déficit que ocorreria em{' '}
+                  <strong>
+                    {formatShortDatePT(baselineProjection.metrics.firstShortfallDate!)}
+                  </strong>{' '}
+                  foi <strong className="text-[#168030]">eliminado</strong> nesta simulação.
+                </span>
+              ) : simulationDelta.lowestBalanceGainCents > 0 ? (
+                <span>
+                  Seu menor saldo projetado subiu{' '}
+                  <strong className="text-[#168030]">
+                    +{formatBRL(simulationDelta.lowestBalanceGainCents)}
+                  </strong>
+                  .
+                </span>
+              ) : (
+                <span>
+                  Simular não altera agendamentos reais no banco.
+                </span>
+              )}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={resetAllSimulations}
+            className="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-[#f0f2f7] border border-[rgba(0,100,253,0.24)] text-xs font-semibold text-[#0064fd] shrink-0 transition-colors cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Restaurar original</span>
+          </button>
+        </motion.div>
+      )}
+
+      {/* Destaque Numérico Monumental (Hierarquia Editorial Sem Caixas Aninhadas) */}
+      {alertStatus === 'INSUFFICIENT_DATA' ? (
+        <div className="py-4 border-y border-[rgba(21,26,40,0.08)] space-y-3">
+          <div className="label-caps">Saldo disponível não sincronizado</div>
+          <p className="text-sm text-[rgba(21,26,40,0.68)] leading-relaxed">
+            Para evitar falsos alertas de segurança, não emitimos previsão sem confirmar o
+            saldo livre da conta.
+          </p>
+          {!editingBalance ? (
             <button
               type="button"
               onClick={handleOpenBalanceEdit}
-              className="px-3.5 py-2 rounded-[6px] bg-[#00E58F] hover:bg-[#19F0A0] text-[#04101A] font-bold text-xs shrink-0 transition-colors cursor-pointer min-h-[40px]"
+              className="px-4 py-2 rounded-full bg-[#0064fd] hover:bg-[#0052d6] text-white text-xs font-semibold transition-colors cursor-pointer"
             >
-              Informar Saldo Livre
+              Informar saldo e simular projeção
             </button>
-          </div>
-        )}
-
-        {/* Linha 3: Tríade de KPIs em Células Técnicas */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-          {/* Célula 1: Saldo Livre Hoje */}
-          <div className="abyssal-cell rounded-[8px] p-3 flex flex-col justify-between">
-            <div className="flex items-center justify-between gap-1 mb-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Saldo Livre Hoje
+          ) : null}
+        </div>
+      ) : (
+        <div className="py-5 border-y border-[rgba(21,26,40,0.08)] grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Coluna 1: Menor Saldo Projetado (O Número Monumental) */}
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <span className="label-caps">
+                {isLowestNegative ? 'Maior falta projetada' : 'Menor saldo em 30 dias'}
               </span>
+              <span className="text-xs font-medium text-[rgba(21,26,40,0.55)]">
+                em {formatShortDatePT(metrics.lowestProjectedBalanceDate)}
+              </span>
+            </div>
+
+            <div
+              className={`text-3xl sm:text-4xl font-bold tracking-tight leading-none ${
+                isLowestNegative ? 'text-[#e04545]' : 'text-[#0064fd]'
+              }`}
+            >
+              <CurrencyDisplay
+                cents={metrics.lowestProjectedBalanceCents}
+                showPlusSign={metrics.lowestProjectedBalanceCents > 0}
+              />
+            </div>
+
+            <div className="mt-2 text-xs text-[rgba(21,26,40,0.58)]">
+              {simulationDelta.hasChanges &&
+              baselineProjection.metrics.lowestProjectedBalanceCents !==
+                metrics.lowestProjectedBalanceCents ? (
+                <span>
+                  Antes da simulação:{' '}
+                  <span className="line-through text-[rgba(21,26,40,0.45)]">
+                    {formatBRL(baselineProjection.metrics.lowestProjectedBalanceCents)}
+                  </span>
+                </span>
+              ) : metrics.firstShortfallDate ? (
+                <span className="text-[#c93333] font-medium">
+                  1ª insuficiência em {formatShortDatePT(metrics.firstShortfallDate)} (
+                  {metrics.daysUntilShortfall === 0
+                    ? 'hoje'
+                    : `daqui a ${metrics.daysUntilShortfall} dias`}
+                  )
+                </span>
+              ) : (
+                <span>
+                  Saldo só c/ confirmados: {formatBRL(metrics.lowestConfirmedBalanceCents)}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Coluna 2: Saldo Livre Hoje */}
+          <div className="sm:border-l sm:border-[rgba(21,26,40,0.08)] sm:pl-6">
+            <div className="flex items-center justify-between gap-2 mb-1.5">
+              <span className="label-caps">Saldo livre hoje</span>
               <button
                 type="button"
                 onClick={handleOpenBalanceEdit}
-                className="inline-flex items-center gap-1 text-[11px] text-[#00E58F] hover:underline font-medium cursor-pointer"
-                title="Simular outro saldo disponível"
+                className="text-xs font-semibold text-[#0064fd] hover:underline cursor-pointer"
               >
-                <Edit3 className="w-3 h-3" />
-                <span>Simular</span>
+                Alterar saldo
               </button>
             </div>
 
             {editingBalance ? (
-              <form onSubmit={handleSaveBalance} className="mt-1 space-y-2">
+              <form onSubmit={handleSaveBalance} className="space-y-2 mt-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-mono-tabular text-slate-400">R$</span>
+                  <span className="text-xs text-[rgba(21,26,40,0.5)]">R$</span>
                   <input
                     type="text"
                     inputMode="decimal"
                     value={balanceInput}
                     onChange={(e) => setBalanceInput(e.target.value)}
-                    className="w-full px-2 py-1 rounded-[5px] bg-[#061826] border border-[#00E58F] text-white font-mono-tabular text-sm focus:outline-none"
-                    placeholder="1.420,00"
+                    className="w-full px-2.5 py-1 rounded-lg bg-[#f8f9fc] border border-[#0064fd] text-[#151a28] font-tabular text-sm font-semibold focus:outline-none"
                     autoFocus
                   />
                 </div>
                 <div className="flex items-center gap-1.5">
                   <button
                     type="submit"
-                    className="px-2.5 py-1 rounded-[4px] bg-[#00E58F] text-[#061826] text-xs font-bold cursor-pointer"
+                    className="px-3 py-1 rounded-full bg-[#0064fd] text-white text-xs font-semibold cursor-pointer"
                   >
                     Aplicar
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditingBalance(false)}
-                    className="px-2 py-1 rounded-[4px] bg-slate-800 text-slate-300 text-xs cursor-pointer"
+                    className="px-2.5 py-1 rounded-full bg-[#f0f2f7] text-[rgba(21,26,40,0.7)] text-xs cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -275,181 +261,127 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
               </form>
             ) : (
               <>
-                <div className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+                <div className="text-2xl sm:text-3xl font-bold text-[#151a28] tracking-tight leading-none">
                   {effectiveSnapshot.availableBalanceCents !== null ? (
                     <CurrencyDisplay cents={effectiveSnapshot.availableBalanceCents} />
                   ) : (
-                    <span className="font-mono-tabular text-slate-400 text-base">
-                      Não sincronizado
-                    </span>
+                    <span>—</span>
                   )}
                 </div>
-                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-400">
-                  <Lock className="w-3 h-3 text-[#00E58F] shrink-0" />
-                  <span className="truncate">
-                    Sem contar {formatBRL(effectiveSnapshot.overdraftLimitCents)} de limite
-                  </span>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Célula 2: Menor Saldo Projetado (Vale de Liquidez) */}
-          <div className="abyssal-cell rounded-[8px] p-3 flex flex-col justify-between">
-            <div className="flex items-center justify-between gap-1 mb-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Menor Saldo (30d)
-              </span>
-              <span className="font-mono-tabular text-[11px] text-slate-300">
-                {alertStatus !== 'INSUFFICIENT_DATA'
-                  ? formatShortDatePT(metrics.lowestProjectedBalanceDate)
-                  : '--'}
-              </span>
-            </div>
-
-            {alertStatus === 'INSUFFICIENT_DATA' ? (
-              <div className="text-base font-mono-tabular text-slate-400 py-1">
-                Aguardando dados
-              </div>
-            ) : (
-              <>
-                <div
-                  className={`text-xl sm:text-2xl font-bold tracking-tight ${
-                    metrics.lowestProjectedBalanceCents < 0
-                      ? 'text-rose-400'
-                      : 'text-[#00E58F]'
-                  }`}
-                >
-                  <CurrencyDisplay
-                    cents={metrics.lowestProjectedBalanceCents}
-                    showPlusSign={metrics.lowestProjectedBalanceCents > 0}
-                  />
-                </div>
-                <div className="mt-1.5 text-[11px] text-slate-300 flex items-center justify-between gap-1">
-                  {simulationDelta.hasChanges &&
-                  baselineProjection.metrics.lowestProjectedBalanceCents !==
-                    metrics.lowestProjectedBalanceCents ? (
-                    <span className="text-indigo-300 font-mono-tabular truncate">
-                      Antes:{' '}
-                      <span className="line-through opacity-75">
-                        {formatBRL(baselineProjection.metrics.lowestProjectedBalanceCents)}
-                      </span>
-                    </span>
-                  ) : metrics.firstShortfallDate ? (
-                    <span className="text-rose-300 truncate">
-                      1ª falta em {formatShortDatePT(metrics.firstShortfallDate)} (
-                      {metrics.daysUntilShortfall === 0
-                        ? 'hoje'
-                        : `daqui a ${metrics.daysUntilShortfall}d`}
-                      )
-                    </span>
-                  ) : (
-                    <span className="text-slate-400 truncate">
-                      Firme: {formatBRL(metrics.lowestConfirmedBalanceCents)}
-                    </span>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Célula 3: Próximo Recebimento Esperado */}
-          <div className="abyssal-cell rounded-[8px] p-3 flex flex-col justify-between">
-            <div className="flex items-center justify-between gap-1 mb-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Próximo Recebimento
-              </span>
-              {metrics.nextExpectedInflow && (
-                <span className="font-mono-tabular text-[11px] text-[#00E58F]">
-                  {formatShortDatePT(metrics.nextExpectedInflow.entry.effectiveDate)}
-                </span>
-              )}
-            </div>
-
-            {metrics.nextExpectedInflow ? (
-              <>
-                <div className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  <CurrencyDisplay
-                    cents={metrics.nextExpectedInflow.entry.amountCents}
-                    showPlusSign
-                  />
-                </div>
-                <div className="mt-1.5 flex items-center gap-1 text-[11px] text-slate-300 truncate">
-                  <TrendingUp className="w-3 h-3 text-[#00E58F] shrink-0" />
-                  <span className="truncate">
-                    {metrics.nextExpectedInflow.entry.title} (em{' '}
-                    {metrics.nextExpectedInflow.daysUntil}d)
-                  </span>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="text-base font-mono-tabular text-slate-400 py-1">
-                  Nenhum previsto
-                </div>
-                <div className="mt-1.5 text-[11px] text-slate-400 flex items-center gap-1">
-                  <CalendarClock className="w-3 h-3 shrink-0" />
-                  <span>Sem entradas mapeadas</span>
-                </div>
+                <p className="mt-2 text-xs text-[rgba(21,26,40,0.52)]">
+                  Exclui {formatBRL(effectiveSnapshot.overdraftLimitCents)} de limite da conta
+                </p>
               </>
             )}
           </div>
         </div>
+      )}
 
-        {/* Barra de Resumo de Fluxos & Botão de Simular Novo Compromisso */}
-        {alertStatus !== 'INSUFFICIENT_DATA' && (
-          <div className="pt-3 border-t border-[#163A54] flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-slate-300">
+      {/* Formulário quando INSUFFICIENT_DATA e clicou em editar */}
+      {alertStatus === 'INSUFFICIENT_DATA' && editingBalance && (
+        <form
+          onSubmit={handleSaveBalance}
+          className="p-4 rounded-[12px] bg-[#f8f9fc] border border-[rgba(0,100,253,0.25)] space-y-3"
+        >
+          <label className="block text-xs font-semibold text-[#151a28]">
+            Informe o saldo disponível para simular (R$)
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={balanceInput}
+              onChange={(e) => setBalanceInput(e.target.value)}
+              className="w-full px-3 py-1.5 rounded-lg bg-white border border-[rgba(21,26,40,0.16)] text-sm font-tabular font-semibold"
+              autoFocus
+            />
+            <button
+              type="submit"
+              className="px-4 py-1.5 rounded-full bg-[#0064fd] text-white text-xs font-semibold shrink-0 cursor-pointer"
+            >
+              Calcular fôlego
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Diagnóstico Humano e Direto */}
+      <motion.div
+        key={`${activeScenario.id}-${alertStatus}`}
+        initial={{ opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.18 }}
+        aria-live="polite"
+        aria-atomic="true"
+        className="space-y-2"
+      >
+        <h1 className="text-lg sm:text-[19px] font-semibold text-[#151a28] leading-snug">
+          {headline}
+        </h1>
+        <p className="text-sm text-[rgba(21,26,40,0.65)] leading-relaxed">
+          {explanation}
+        </p>
+      </motion.div>
+
+      {/* Linha de Apoio: Próximo Recebimento & Total de Saídas */}
+      {alertStatus !== 'INSUFFICIENT_DATA' && (
+        <div className="pt-4 border-t border-[rgba(21,26,40,0.08)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1 text-xs text-[rgba(21,26,40,0.65)]">
+            {metrics.nextExpectedInflow ? (
+              <div>
+                Próxima entrada:{' '}
+                <strong className="text-[#168030] font-tabular">
+                  +{formatBRL(metrics.nextExpectedInflow.entry.amountCents)}
+                </strong>{' '}
+                em {formatShortDatePT(metrics.nextExpectedInflow.entry.effectiveDate)} (
+                {metrics.nextExpectedInflow.entry.title})
+              </div>
+            ) : (
+              <div>Nenhuma entrada prevista nos próximos 30 dias</div>
+            )}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span>
-                Saídas confirmadas:{' '}
-                <strong className="font-mono-tabular text-white">
-                  -{formatBRL(metrics.totalConfirmedOutflowsCents)}
+                Contas confirmadas:{' '}
+                <strong className="text-[#151a28] font-tabular">
+                  −{formatBRL(metrics.totalConfirmedOutflowsCents)}
                 </strong>
               </span>
               {metrics.totalEstimatedOutflowsCents > 0 && (
                 <span>
-                  Estimadas:{' '}
-                  <strong className="font-mono-tabular text-amber-300">
-                    -{formatBRL(metrics.totalEstimatedOutflowsCents)}
-                  </strong>
-                </span>
-              )}
-              {metrics.totalUncertainInflowsCents > 0 && (
-                <span>
-                  Recebimento incerto:{' '}
-                  <strong className="font-mono-tabular text-amber-300">
-                    +{formatBRL(metrics.totalUncertainInflowsCents)}
+                  Recorrências estimadas:{' '}
+                  <strong className="text-[#a36200] font-tabular">
+                    −{formatBRL(metrics.totalEstimatedOutflowsCents)}
                   </strong>
                 </span>
               )}
             </div>
+          </div>
 
-            <button
-              type="button"
-              onClick={onOpenNewEntryModal}
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-[6px] bg-[#0F2E46] hover:bg-[#163F5E] border border-[#235378] text-[#00E58F] font-semibold text-xs transition-colors min-h-[38px] cursor-pointer shrink-0"
+          <button
+            type="button"
+            onClick={onOpenNewEntryModal}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-[rgba(0,100,253,0.08)] hover:bg-[rgba(0,100,253,0.14)] border border-[rgba(0,100,253,0.22)] text-[#0064fd] text-xs font-semibold transition-colors shrink-0 cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Simular lançamento</span>
+          </button>
+        </div>
+      )}
+
+      {/* Nota Editorial de Ação */}
+      {actionableHints.length > 0 && (
+        <div className="rounded-[12px] bg-[#f8f9fc] border border-[rgba(21,26,40,0.07)] p-3.5 space-y-1.5">
+          {actionableHints.map((hint, idx) => (
+            <p
+              key={idx}
+              className="text-xs text-[rgba(21,26,40,0.66)] leading-relaxed flex items-start gap-2"
             >
-              <PlusCircle className="w-3.5 h-3.5" />
-              <span>Simular gasto ou entrada</span>
-            </button>
-          </div>
-        )}
-
-        {/* Dicas Determinísticas Acionáveis */}
-        {actionableHints.length > 0 && (
-          <div className="space-y-1.5 pt-1">
-            {actionableHints.map((hint, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-2 text-xs text-slate-300 bg-[#081E30] border border-[#14354D] rounded-[6px] px-3 py-2"
-              >
-                <span className="text-[#00E58F] font-bold">›</span>
-                <span>{hint}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#0064fd] mt-1.5 shrink-0" />
+              <span>{hint}</span>
+            </p>
+          ))}
+        </div>
+      )}
     </section>
   );
 };

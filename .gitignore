@@ -5,3 +5,6 @@ dist-ssr
 .vercel
 .DS_Store
 coverage
+
+.vercel
+.env*

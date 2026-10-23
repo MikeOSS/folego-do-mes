@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight, Presentation, ShieldCheck } from 'lucide-react';
 import { FinancialStoreProvider, useFinancialStore } from './state/useFinancialStore';
 import { TopDemoRibbon } from './components/TopDemoRibbon';
 import { PulseHeroCard } from './components/PulseHeroCard';
@@ -8,100 +8,107 @@ import { CommitmentsLedger } from './components/CommitmentsLedger';
 import { SimulatorSheet } from './components/SimulatorSheet';
 
 const MainWorkspace: React.FC = () => {
-  const { activeScenario, activeProjection } = useFinancialStore();
+  const { activeProjection } = useFinancialStore();
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#F4F6F8] text-[#091521]">
-      {/* Barra Superior de Instrumentação dos 7 Cenários Demonstrativos */}
+    <div className="min-h-[100dvh] flex flex-col text-[#151a28]">
+      {/* Header Unificado com Logo, Seletor dos 7 Cenários e Acesso aos Slides */}
       <TopDemoRibbon />
 
-      {/* Cabeçalho Institucional da Plataforma Fôlego do Mês */}
-      <div className="bg-white border-b border-[#DCE3EA]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-[8px] bg-[#061826] border border-[#14354D] flex items-center justify-center shadow-xs">
-              <Activity className="w-5 h-5 text-[#00E58F]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-base sm:text-lg font-extrabold tracking-tight text-[#091521]">
-                  Fôlego do Mês
-                </span>
-                <span className="px-1.5 py-0.5 rounded-[4px] bg-[#E6F6F0] border border-[#00875A]/30 text-[#006644] font-mono-tabular text-[10px] font-bold uppercase">
-                  Previsibilidade 30d
-                </span>
-              </div>
-              <p className="text-xs text-[#475869]">
-                Monitoramento determinístico de liquidez e cobertura de compromissos
-              </p>
-            </div>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-2 text-xs text-[#475869] bg-[#F4F6F8] border border-[#DCE3EA] rounded-[6px] px-3 py-1.5">
-            <ShieldCheck className="w-4 h-4 text-[#00875A]" />
-            <span>
-              Cliente demonstrativo: <strong className="text-[#091521]">{activeScenario.personaName}</strong>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Área Principal Responsiva:
-          - Mobile (< 1024px): Fluxo Único Vertical Contínuo (Pulso -> Curva -> Ledger)
-          - Desktop (>= 1024px): Split View Assimétrico Editorial (Pulso Fixo à Esquerda + Curva & Ledger à Direita) */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-          {/* Coluna Esquerda (Desktop Sticky 5 colunas): Pulso do Mês + Escopo */}
-          <div className="lg:col-span-5 lg:sticky lg:top-16 space-y-4">
+      {/* Layout Assimétrico Editorial (Mobile: coluna única / Desktop: 5 cols fixas + 7 cols de análise) */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Coluna Esquerda (Sticky no Desktop): Pulso do Mês + Transparência & Case */}
+          <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4">
             <PulseHeroCard onOpenNewEntryModal={() => setIsCreatingNew(true)} />
 
-            {/* Nota de Escopo e Transparência Metodológica */}
-            <aside className="tactile-card rounded-[10px] p-4 space-y-2 text-xs text-[#475869]">
-              <div className="font-bold text-[#091521] uppercase tracking-wider text-[11px]">
-                Como o Fôlego do Mês calcula sua projeção
+            {/* Card de Transparência do Motor Determinístico & Acesso aos Slides do Case */}
+            <aside className="surface-raised p-5 space-y-4 text-xs text-[#525b6e]">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#168030] shrink-0" />
+                  <span className="font-semibold text-[#151a28]">
+                    Regras de proteção deste cálculo
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono-tabular uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#f1f4f9] text-[#525b6e]">
+                  100% Determinístico
+                </span>
               </div>
-              <p className="leading-relaxed">{activeProjection.scopeDisclaimer}</p>
-              <ul className="space-y-1 text-[11px] list-disc list-inside text-[#475869]">
-                <li>
-                  <strong>Cheque especial isolado:</strong> limites de crédito nunca são
-                  somados ao seu saldo disponível.
-                </li>
-                <li>
-                  <strong>Proteção contra duplicidade:</strong> boletos do DDA equivalentes
-                  a lembretes manuais são descontados apenas uma vez.
-                </li>
-                <li>
-                  <strong>Simulação segura:</strong> testar datas ou marcar "pago por outro
-                  banco" não cancela agendamentos reais.
-                </li>
-              </ul>
+
+              <p className="leading-relaxed text-[#525b6e]">
+                {activeProjection.scopeDisclaimer}
+              </p>
+
+              <div className="grid grid-cols-1 gap-2 pt-1 border-t border-[#151a28]/6 text-[11px]">
+                <div className="flex items-baseline gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#0064fd] shrink-0 translate-y-[-1px]" />
+                  <span>
+                    <strong className="text-[#151a28]">Sem cheque especial:</strong> limite
+                    de crédito nunca é somado ao seu saldo real.
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#2fc750] shrink-0 translate-y-[-1px]" />
+                  <span>
+                    <strong className="text-[#151a28]">Sem duplicidade:</strong> boletos DDA
+                    equivalentes a lembretes manuais contam uma única vez.
+                  </span>
+                </div>
+              </div>
+
+              <a
+                href="/slides/index.html"
+                className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#0064fd]/[0.05] hover:bg-[#0064fd]/[0.1] border border-[#0064fd]/15 transition-colors group"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-[#0064fd] text-white flex items-center justify-center shrink-0">
+                    <Presentation className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-xs font-semibold text-[#151a28] block truncate">
+                      Apresentação do Case · Fôlego do Mês
+                    </span>
+                    <span className="text-[11px] text-[#525b6e] block truncate">
+                      Ver 15 slides interativos (Arquitetura, Produto e IA)
+                    </span>
+                  </div>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-[#0064fd] shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </a>
             </aside>
           </div>
 
-          {/* Coluna Direita (Desktop 7 colunas): Curva de Fôlego em Degraus + Ledger Cronológico */}
-          <div className="lg:col-span-7 space-y-5">
+          {/* Coluna Direita: Curva de Evolução do Saldo + Extrato Projetado */}
+          <div className="lg:col-span-7 space-y-6">
             <LiquidityStepChart />
             <CommitmentsLedger onOpenNewEntryModal={() => setIsCreatingNew(true)} />
           </div>
         </div>
       </main>
 
-      {/* Rodapé Discreto de Protótipo Independente */}
-      <footer className="mt-8 border-t border-[#DCE3EA] bg-white py-4 px-4 sm:px-6 text-center text-xs text-[#475869]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      {/* Rodapé Discreto */}
+      <footer className="mt-10 border-t border-[#151a28]/7 bg-white/60 py-5 px-4 sm:px-6 text-xs text-[#8891a5]">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <p>
-            <strong>Fôlego do Mês</strong> — Protótipo funcional independente com dados
-            fictícios, desenvolvido para apresentação técnica.
+            <strong className="text-[#525b6e]">Fôlego do Mês</strong> · Antecipar o aperto.
+            Dar tempo para agir. · Miguel Fernandes Costacurta
           </p>
-          <p className="text-[11px] text-[#7A8C9E]">
-            Sem vínculo oficial com o Agibank • Motor financeiro determinístico testado com
-            Vitest
-          </p>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span>Protótipo funcional com dados fictícios</span>
+            <span>·</span>
+            <a
+              href="/slides/index.html"
+              className="text-[#0064fd] font-medium hover:underline"
+            >
+              Abrir Slides da Apresentação
+            </a>
+          </div>
         </div>
       </footer>
 
-      {/* Bottom Sheet / Modal de Simulação e Edição */}
+      {/* Modal / Bottom Sheet de Simulação */}
       <SimulatorSheet
         isCreatingNew={isCreatingNew}
         onCloseCreateNew={() => setIsCreatingNew(false)}

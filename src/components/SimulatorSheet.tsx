@@ -3,7 +3,7 @@ import {
   AlertTriangle,
   Calendar,
   Check,
-  Lock,
+  Info,
   RotateCcw,
   Trash2,
   X,
@@ -66,7 +66,6 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
     return nextInflow ? nextInflow.projectedDate : null;
   }, [activeProjection.evaluatedEntries]);
 
-  // Estado local do formulário (para edição ou criação)
   const [title, setTitle] = useState('');
   const [amountInput, setAmountInput] = useState('');
   const [effectiveDate, setEffectiveDate] = useState('2026-11-10');
@@ -156,7 +155,6 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
     }
   };
 
-  // Verifica se a data escolhida no formulário é posterior ao vencimento original
   const previewLatePenalty =
     evaluatedTarget !== null &&
     shouldTriggerLatePenalty({
@@ -170,348 +168,351 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
     <AnimatePresence>
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#061826]/65 backdrop-blur-[2px] p-0 sm:p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#151a28]/45 backdrop-blur-xs p-0 sm:p-4"
           onClick={handleClose}
         >
-        <motion.div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="simulator-sheet-title"
-          initial={{ opacity: 0, y: 36 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 24 }}
-          transition={{ duration: 0.18 }}
-          onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-lg bg-white rounded-t-[16px] sm:rounded-[12px] border border-[#DCE3EA] shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col"
-        >
-          {/* Cabeçalho Tátil Escuro */}
-          <div className="bg-[#061826] text-white px-4 py-3.5 sm:px-5 flex items-center justify-between border-b border-[#163A54]">
-            <div>
-              <span className="text-[10px] font-mono-tabular uppercase tracking-wider text-[#00E58F] font-bold block">
-                {isCreatingNew
-                  ? 'Simular Nova Movimentação'
-                  : 'Simulador & Correção de Compromisso'}
-              </span>
-              <h2 id="simulator-sheet-title" className="text-base font-bold truncate">
-                {isCreatingNew
-                  ? 'Adicionar lançamento hipotético'
-                  : evaluatedTarget?.entry.title}
-              </h2>
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="simulator-sheet-title"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.18 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl border border-[#151a28]/10 shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col"
+          >
+            {/* Cabeçalho Limpo e Luminoso */}
+            <div className="px-5 py-4 flex items-center justify-between border-b border-[#151a28]/8">
+              <div className="min-w-0">
+                <span className="text-[11px] font-mono-tabular uppercase tracking-[0.12em] text-[#0064fd] font-semibold block">
+                  {isCreatingNew
+                    ? 'Simular Nova Movimentação'
+                    : 'Simular Ajuste de Compromisso'}
+                </span>
+                <h2
+                  id="simulator-sheet-title"
+                  className="text-base sm:text-lg font-bold tracking-[-0.02em] text-[#151a28] truncate"
+                >
+                  {isCreatingNew
+                    ? 'Adicionar lançamento hipotético'
+                    : evaluatedTarget?.entry.title}
+                </h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleClose}
+                aria-label="Fechar painel de simulação"
+                className="p-2 rounded-full bg-[#f1f4f9] hover:bg-[#e6ebf3] text-[#525b6e] transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={handleClose}
-              aria-label="Fechar painel de simulação"
-              className="p-2 rounded-[6px] bg-[#0C2538] hover:bg-[#163A54] text-slate-300 transition-colors cursor-pointer"
+            {/* Nota de Segurança e Escopo */}
+            <div className="px-5 py-2.5 bg-[#f8f9fc] border-b border-[#151a28]/6 flex items-start gap-2 text-xs text-[#525b6e]">
+              <Info className="w-3.5 h-3.5 text-[#0064fd] shrink-0 mt-0.5" />
+              <span>
+                Alterações simuladas recalculam seu fôlego na hora, mas{' '}
+                <strong className="text-[#151a28]">
+                  não cancelam nem pagam boletos reais
+                </strong>
+                .
+              </span>
+            </div>
+
+            <form
+              onSubmit={handleApplyChanges}
+              className="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm"
             >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
+              {/* Atalhos Rápidos de 1 Toque */}
+              {!isCreatingNew && evaluatedTarget && (
+                <div className="space-y-2 pb-3.5 border-b border-[#151a28]/8">
+                  <span className="text-[11px] font-medium text-[#8891a5] block">
+                    Testar decisão com 1 toque:
+                  </span>
 
-          {/* Aviso de Segurança: Simulação vs. Pagamento Real */}
-          <div className="px-4 py-2.5 sm:px-5 bg-indigo-50 border-b border-indigo-200 flex items-start gap-2 text-xs text-indigo-950">
-            <Lock className="w-3.5 h-3.5 text-indigo-600 shrink-0 mt-0.5" />
-            <span>
-              <strong>Apenas simulação:</strong> alterações feitas aqui atualizam o cálculo
-              de fôlego instantaneamente, mas{' '}
-              <strong>não cancelam nem alteram agendamentos bancários reais</strong>.
-            </span>
-          </div>
-
-          <form
-            onSubmit={handleApplyChanges}
-            className="p-4 sm:p-5 overflow-y-auto space-y-4 text-xs sm:text-sm"
-          >
-            {/* Atalhos Táteis de 1 Toque (Quick-Sim Pills) para itens existentes */}
-            {!isCreatingNew && evaluatedTarget && (
-              <div className="space-y-2 pb-3 border-b border-[#DCE3EA]">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#475869] block">
-                  Atalhos rápidos de simulação (1 toque):
-                </span>
-
-                <div className="flex flex-wrap gap-2">
-                  {evaluatedTarget.entry.type === 'outflow' && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        updateEntryOverride(evaluatedTarget.entry.id, {
-                          status: 'paid_other_bank',
-                        });
-                        handleClose();
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-[#006644] font-semibold text-xs min-h-[40px] cursor-pointer"
-                    >
-                      <Check className="w-3.5 h-3.5" />
-                      <span>Já paguei por outro banco</span>
-                    </button>
-                  )}
-
-                  {evaluatedTarget.entry.type === 'outflow' &&
-                    nextSalaryDate &&
-                    compareISODates(evaluatedTarget.entry.effectiveDate, nextSalaryDate) <
-                      0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {evaluatedTarget.entry.type === 'outflow' && (
                       <button
                         type="button"
                         onClick={() => {
                           updateEntryOverride(evaluatedTarget.entry.id, {
-                            effectiveDate: nextSalaryDate,
+                            status: 'paid_other_bank',
                           });
                           handleClose();
                         }}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-[#EEF2F5] hover:bg-[#E2E8F0] border border-[#B8C5D1] text-[#091521] font-semibold text-xs min-h-[40px] cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#2fc750]/12 hover:bg-[#2fc750]/20 text-[#168030] font-semibold text-xs transition-colors cursor-pointer"
                       >
-                        <Calendar className="w-3.5 h-3.5 text-[#0052CC]" />
-                        <span>
-                          Simular no dia do recebimento ({formatShortDatePT(nextSalaryDate)})
-                        </span>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Já paguei por outro banco</span>
                       </button>
                     )}
 
-                  {evaluatedTarget.entry.certainty === 'estimated' && (
+                    {evaluatedTarget.entry.type === 'outflow' &&
+                      nextSalaryDate &&
+                      compareISODates(evaluatedTarget.entry.effectiveDate, nextSalaryDate) <
+                        0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            updateEntryOverride(evaluatedTarget.entry.id, {
+                              effectiveDate: nextSalaryDate,
+                            });
+                            handleClose();
+                          }}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#0064fd]/10 hover:bg-[#0064fd]/16 text-[#0064fd] font-semibold text-xs transition-colors cursor-pointer"
+                        >
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>
+                            Simular em {formatShortDatePT(nextSalaryDate)} (após entrada)
+                          </span>
+                        </button>
+                      )}
+
+                    {evaluatedTarget.entry.certainty === 'estimated' && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const halfCents = Math.round(
+                            evaluatedTarget.entry.amountCents * 0.5
+                          );
+                          updateEntryOverride(evaluatedTarget.entry.id, {
+                            amountCents: halfCents,
+                          });
+                          handleClose();
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-amber-500/12 hover:bg-amber-500/20 text-[#b87810] font-semibold text-xs transition-colors cursor-pointer"
+                      >
+                        <span>Reduzir gasto estimado em 50%</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Seletor Saída vs Entrada (Ao criar novo) */}
+              {isCreatingNew && (
+                <div>
+                  <label className="block text-xs font-semibold text-[#151a28] mb-1.5">
+                    Tipo de movimentação
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[#f1f4f9]">
                     <button
                       type="button"
-                      onClick={() => {
-                        const halfCents = Math.round(
-                          evaluatedTarget.entry.amountCents * 0.5
-                        );
-                        updateEntryOverride(evaluatedTarget.entry.id, {
-                          amountCents: halfCents,
-                        });
-                        handleClose();
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-amber-50 hover:bg-amber-100 border border-amber-300 text-[#92400E] font-semibold text-xs min-h-[40px] cursor-pointer"
+                      onClick={() => setType('outflow')}
+                      className={`py-2 px-3 rounded-lg font-semibold text-xs transition-all cursor-pointer ${
+                        type === 'outflow'
+                          ? 'bg-white text-[#151a28] shadow-xs'
+                          : 'text-[#525b6e] hover:text-[#151a28]'
+                      }`}
                     >
-                      <span>Reduzir gasto estimado em 50%</span>
+                      Saída / Conta (−)
                     </button>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => setType('inflow')}
+                      className={`py-2 px-3 rounded-lg font-semibold text-xs transition-all cursor-pointer ${
+                        type === 'inflow'
+                          ? 'bg-white text-[#168030] shadow-xs'
+                          : 'text-[#525b6e] hover:text-[#151a28]'
+                      }`}
+                    >
+                      Entrada / Recebimento (+)
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Tipo (Apenas ao criar novo) */}
-            {isCreatingNew && (
+              {/* Descrição */}
               <div>
-                <label className="block text-xs font-bold text-[#091521] mb-1.5">
-                  Tipo de movimentação
-                </label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setType('outflow')}
-                    className={`py-2 px-3 rounded-[6px] font-semibold text-xs border cursor-pointer min-h-[40px] ${
-                      type === 'outflow'
-                        ? 'bg-[#091521] border-[#091521] text-white'
-                        : 'bg-[#F4F6F8] border-[#DCE3EA] text-[#475869]'
-                    }`}
-                  >
-                    Saída / Compromisso (-)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setType('inflow')}
-                    className={`py-2 px-3 rounded-[6px] font-semibold text-xs border cursor-pointer min-h-[40px] ${
-                      type === 'inflow'
-                        ? 'bg-[#00875A] border-[#00875A] text-white'
-                        : 'bg-[#F4F6F8] border-[#DCE3EA] text-[#475869]'
-                    }`}
-                  >
-                    Recebimento / Entrada (+)
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Descrição */}
-            <div>
-              <label className="block text-xs font-bold text-[#091521] mb-1">
-                Descrição do compromisso
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                placeholder="Ex: Conta de Luz, Supermercado, Freela..."
-                className="w-full px-3 py-2 rounded-[6px] border border-[#B8C5D1] text-[#091521] text-sm focus:outline-none focus:border-[#0052CC]"
-              />
-            </div>
-
-            {/* Valor e Data */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-[#091521] mb-1">
-                  Valor (R$)
+                <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                  Descrição
                 </label>
                 <input
                   type="text"
-                  inputMode="decimal"
-                  value={amountInput}
-                  onChange={(e) => setAmountInput(e.target.value)}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   required
-                  className="w-full px-3 py-2 rounded-[6px] border border-[#B8C5D1] text-[#091521] font-mono-tabular font-semibold text-sm focus:outline-none focus:border-[#0052CC]"
+                  placeholder="Ex: Conta de Luz, Supermercado, Freela..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] focus:bg-white text-[#151a28] text-sm focus:outline-none focus:border-[#0064fd] transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-[#091521] mb-1">
-                  Data considerada na simulação
-                </label>
-                <input
-                  type="date"
-                  value={effectiveDate}
-                  min={activeScenario.snapshot.referenceDate}
-                  max={addDaysISO(
-                    activeScenario.snapshot.referenceDate,
-                    activeScenario.snapshot.horizonDays
-                  )}
-                  onChange={(e) => setEffectiveDate(e.target.value)}
-                  required
-                  className="w-full px-3 py-2 rounded-[6px] border border-[#B8C5D1] text-[#091521] font-mono-tabular text-sm focus:outline-none focus:border-[#0052CC]"
-                />
-              </div>
-            </div>
-
-            {/* Advertência imediata se simular pagamento após o vencimento */}
-            {previewLatePenalty && evaluatedTarget && (
-              <div className="p-3 rounded-[6px] bg-amber-50 border border-amber-300 flex items-start gap-2 text-xs text-[#92400E]">
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              {/* Valor e Data */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <strong>Atenção ao vencimento original ({formatShortDatePT(evaluatedTarget.entry.dueDate)}):</strong>{' '}
-                  pagar compromissos confirmados após o vencimento pode gerar multas, juros
-                  moratórios ou corte de serviço. Esta simulação não recomenda atrasar
-                  contas; serve apenas para visualizar cenários de caixa.
+                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                    Valor (R$)
+                  </label>
+                  <input
+                    type="text"
+                    inputMode="decimal"
+                    value={amountInput}
+                    onChange={(e) => setAmountInput(e.target.value)}
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] focus:bg-white text-[#151a28] font-mono-tabular font-semibold text-sm focus:outline-none focus:border-[#0064fd] transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                    Data na simulação
+                  </label>
+                  <input
+                    type="date"
+                    value={effectiveDate}
+                    min={activeScenario.snapshot.referenceDate}
+                    max={addDaysISO(
+                      activeScenario.snapshot.referenceDate,
+                      activeScenario.snapshot.horizonDays
+                    )}
+                    onChange={(e) => setEffectiveDate(e.target.value)}
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] focus:bg-white text-[#151a28] font-mono-tabular text-sm focus:outline-none focus:border-[#0064fd] transition-colors"
+                  />
                 </div>
               </div>
-            )}
 
-            {/* Status de Pagamento e Classificação (Confirmado vs Estimado vs Incerto) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-bold text-[#091521] mb-1">
-                  Status do pagamento
-                </label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as EntryStatus)}
-                  className="w-full px-3 py-2 rounded-[6px] border border-[#B8C5D1] bg-white text-[#091521] text-xs font-medium min-h-[40px]"
-                >
-                  <option value="pending">Pendente (Desconta na projeção)</option>
-                  <option value="paid_other_bank">
-                    Pago por outro banco (Não desconta aqui)
-                  </option>
-                  <option value="paid_here">
-                    Já quitado nesta conta (Já saiu do saldo)
-                  </option>
-                  <option value="cancelled">Ignorar / Cancelado na simulação</option>
-                </select>
-              </div>
+              {/* Aviso de Multa/Juros se postergar conta confirmada */}
+              {previewLatePenalty && evaluatedTarget && (
+                <div className="p-3.5 rounded-xl bg-amber-500/8 border border-amber-500/20 flex items-start gap-2.5 text-xs text-[#b87810]">
+                  <AlertTriangle className="w-4 h-4 text-[#e8a020] shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-[#151a28]">
+                      Atenção ao vencimento original (
+                      {formatShortDatePT(evaluatedTarget.entry.dueDate)}):
+                    </strong>{' '}
+                    pagar compromissos confirmados após o vencimento pode gerar multa e
+                    juros. Use apenas para comparar o impacto no caixa.
+                  </div>
+                </div>
+              )}
 
-              <div>
-                <label className="block text-xs font-bold text-[#091521] mb-1">
-                  Grau de certeza
-                </label>
-                <select
-                  value={certainty}
-                  onChange={(e) => setCertainty(e.target.value as CertaintyLevel)}
-                  className="w-full px-3 py-2 rounded-[6px] border border-[#B8C5D1] bg-white text-[#091521] text-xs font-medium min-h-[40px]"
-                >
-                  <option value="confirmed">Confirmado (Valor/data fixos)</option>
-                  <option value="estimated">Estimado (Despesa/renda variável)</option>
-                  {type === 'inflow' && (
-                    <option value="uncertain">
-                      Recebimento Incerto / Sem garantia de data
+              {/* Status e Certeza */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                    Situação do pagamento
+                  </label>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as EntryStatus)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] text-[#151a28] text-xs font-medium focus:outline-none focus:border-[#0064fd]"
+                  >
+                    <option value="pending">Pendente (entra na conta)</option>
+                    <option value="paid_other_bank">
+                      Pago por outro banco (não desconta)
                     </option>
-                  )}
-                </select>
-              </div>
-            </div>
+                    <option value="paid_here">Já quitado nesta conta</option>
+                    <option value="cancelled">Ignorar na simulação</option>
+                  </select>
+                </div>
 
-            {/* Origem do Compromisso & Afeta Conta Monitorada */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
-              <div>
-                <label className="block text-xs font-bold text-[#091521] mb-1">
-                  Origem da informação
+                <div>
+                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                    Grau de certeza
+                  </label>
+                  <select
+                    value={certainty}
+                    onChange={(e) => setCertainty(e.target.value as CertaintyLevel)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] text-[#151a28] text-xs font-medium focus:outline-none focus:border-[#0064fd]"
+                  >
+                    <option value="confirmed">Confirmado (valor e data fixos)</option>
+                    <option value="estimated">Estimado (gasto variável)</option>
+                    {type === 'inflow' && (
+                      <option value="uncertain">Recebimento incerto</option>
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              {/* Origem & Conta Monitorada */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                <div>
+                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                    Origem do registro
+                  </label>
+                  <select
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value as EntryOrigin)}
+                    className="w-full px-3 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] text-[#151a28] text-xs font-medium focus:outline-none focus:border-[#0064fd]"
+                  >
+                    <option value="dda">DDA (Boleto Registrado)</option>
+                    <option value="debito_automatico">Débito Automático</option>
+                    <option value="pix_agendado">Pix Agendado</option>
+                    <option value="recorrente_historico">Média Histórica</option>
+                    <option value="folha_pagamento">Folha de Pagamento</option>
+                    <option value="manual">Lembrete Manual</option>
+                  </select>
+                </div>
+
+                <label className="flex items-center gap-2.5 pt-4 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={affectsMonitoredAccount}
+                    onChange={(e) => setAffectsMonitoredAccount(e.target.checked)}
+                    className="w-4 h-4 accent-[#0064fd] rounded"
+                  />
+                  <span className="text-xs font-medium text-[#151a28]">
+                    Desconta desta conta monitorada
+                  </span>
                 </label>
-                <select
-                  value={origin}
-                  onChange={(e) => setOrigin(e.target.value as EntryOrigin)}
-                  className="w-full px-3 py-2 rounded-[6px] border border-[#B8C5D1] bg-white text-[#091521] text-xs font-medium min-h-[40px]"
-                >
-                  <option value="dda">DDA (Boleto Registrado)</option>
-                  <option value="debito_automatico">Débito Automático</option>
-                  <option value="pix_agendado">Pix Agendado</option>
-                  <option value="recorrente_historico">Recorrente / Histórico</option>
-                  <option value="folha_pagamento">Folha de Pagamento</option>
-                  <option value="manual">Lançamento Manual</option>
-                </select>
               </div>
 
-              <label className="flex items-center gap-2.5 pt-4 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={affectsMonitoredAccount}
-                  onChange={(e) => setAffectsMonitoredAccount(e.target.checked)}
-                  className="w-4 h-4 accent-[#0052CC] rounded"
-                />
-                <span className="text-xs font-medium text-[#091521]">
-                  Afeta o saldo desta conta monitorada
-                </span>
-              </label>
-            </div>
+              {/* Rodapé do Modal */}
+              <div className="pt-4 border-t border-[#151a28]/8 flex flex-wrap items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  {!isCreatingNew &&
+                    evaluatedTarget &&
+                    entryOverrides[evaluatedTarget.entry.id] && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          resetEntryOverride(evaluatedTarget.entry.id);
+                          handleClose();
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#f1f4f9] hover:bg-[#e6ebf3] text-[#151a28] text-xs font-semibold cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Restaurar original</span>
+                      </button>
+                    )}
 
-            {/* Botões de Ação no Rodapé do Modal/Bottom Sheet */}
-            <div className="pt-3 border-t border-[#DCE3EA] flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                {!isCreatingNew &&
-                  evaluatedTarget &&
-                  entryOverrides[evaluatedTarget.entry.id] && (
+                  {isAddedByUser && evaluatedTarget && (
                     <button
                       type="button"
                       onClick={() => {
-                        resetEntryOverride(evaluatedTarget.entry.id);
+                        removeSimulatedEntry(evaluatedTarget.entry.id);
                         handleClose();
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-slate-100 hover:bg-slate-200 text-[#091521] text-xs font-semibold min-h-[40px] cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-rose-500/10 hover:bg-rose-500/18 text-[#c93535] text-xs font-semibold cursor-pointer"
                     >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>Restaurar item</span>
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Excluir</span>
                     </button>
                   )}
+                </div>
 
-                {isAddedByUser && evaluatedTarget && (
+                <div className="flex items-center gap-2 ml-auto">
                   <button
                     type="button"
-                    onClick={() => {
-                      removeSimulatedEntry(evaluatedTarget.entry.id);
-                      handleClose();
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[6px] bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold min-h-[40px] cursor-pointer"
+                    onClick={handleClose}
+                    className="px-4 py-2 rounded-full text-[#525b6e] hover:text-[#151a28] hover:bg-[#f1f4f9] text-xs font-semibold transition-colors cursor-pointer"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Remover item</span>
+                    Cancelar
                   </button>
-                )}
+                  <button
+                    type="submit"
+                    className="px-5 py-2.5 rounded-full bg-[#0064fd] hover:bg-[#0052d0] text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                  >
+                    {isCreatingNew ? 'Adicionar à simulação' : 'Aplicar simulação'}
+                  </button>
+                </div>
               </div>
-
-              <div className="flex items-center gap-2 ml-auto">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-3.5 py-2 rounded-[6px] border border-[#B8C5D1] text-[#475869] hover:text-[#091521] text-xs font-semibold min-h-[40px] cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-[6px] bg-[#0052CC] hover:bg-[#0043A6] text-white text-xs font-bold min-h-[40px] cursor-pointer"
-                >
-                  {isCreatingNew ? 'Adicionar à Simulação' : 'Aplicar Simulação'}
-                </button>
-              </div>
-            </div>
-          </form>
-        </motion.div>
+            </form>
+          </motion.div>
         </div>
       )}
     </AnimatePresence>
