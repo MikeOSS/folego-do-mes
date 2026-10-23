@@ -400,7 +400,7 @@ function executeToolCallsOnStore(
  * Executa a chamada ao Gemini:
  * 1. Se houver API Key no cliente (VITE_GEMINI_API_KEY ou colada pelo usuário), usa @google/genai direto do navegador.
  * 2. Senão, tenta a rota Serverless `/api/gemini` na Vercel (caso GEMINI_API_KEY esteja configurada nas variáveis do projeto).
- * 3. Se nenhuma chave externa estiver configurada ainda, executa o interpretador híbrido determinístico com Function Calling local para que a demonstração nunca falhe ao vivo.
+ * 3. Se nenhuma chave externa estiver configurada ainda, executa o interpretador determinístico local, sem chamar a API Gemini para que a demonstração nunca falhe ao vivo.
  */
 export async function askGeminiFinancialAdvisor(
   userPrompt: string,
@@ -641,7 +641,7 @@ function runLocalHybridAdvisorWithTools(
   if (executedTools.length > 0) {
     return {
       mode: 'hybrid-local-engine',
-      modelUsed: 'gemini-2.5-flash (Function Calling)',
+      modelUsed: 'Motor local (sem Gemini)',
       diagnosis: `Ação executada sobre o motor determinístico: ${executedTools.map((t) => t.summary).join('. ')}. O gráfico em degraus e o menor saldo projetado já foram recalculados em tempo real.`,
       actionPlan: [
         'Compare o card de impacto da simulação no topo para ver quantos reais de fôlego foram recuperados.',
@@ -649,7 +649,7 @@ function runLocalHybridAdvisorWithTools(
         'Você pode clicar em "Restaurar original" a qualquer momento para voltar ao cenário base.',
       ],
       riskDisclaimer:
-        'Simulação executada via Function Calling sobre o Context Pack fechado. Nenhum agendamento bancário real foi alterado.',
+        'Simulação executada por regras locais com dados do Context Pack. Nenhum modelo Gemini foi chamado e nenhum agendamento bancário real foi alterado.',
       executedTools,
     };
   }
@@ -658,7 +658,7 @@ function runLocalHybridAdvisorWithTools(
   if (contextPack.alertStatus === 'PREVENTIVE_ALERT') {
     return {
       mode: 'hybrid-local-engine',
-      modelUsed: 'gemini-2.5-flash (Context Pack)',
+      modelUsed: 'Motor local (sem Gemini)',
       diagnosis: `Identificamos um Alerta Preventivo: seu saldo disponível hoje é ${contextPack.availableBalanceBRL} (sem contar os ${contextPack.overdraftExcludedBRL} de cheque especial), mas suas contas confirmadas levam o saldo a ${contextPack.lowestConfirmedBalanceBRL} em ${contextPack.firstShortfallDate ? formatShortDatePT(contextPack.firstShortfallDate) : 'breve'}, puxado principalmente por "${contextPack.mainCauseEntryTitle ?? 'compromissos fixos'}".`,
       actionPlan: [
         `Caso você já tenha quitado "${contextPack.mainCauseEntryTitle ?? 'essa conta'}" por outro banco, clique em "Simular que paguei a maior conta por outro banco" para corrigir sua projeção.`,
@@ -676,7 +676,7 @@ function runLocalHybridAdvisorWithTools(
   if (contextPack.alertStatus === 'CONDITIONAL_WARNING') {
     return {
       mode: 'hybrid-local-engine',
-      modelUsed: 'gemini-2.5-flash (Context Pack)',
+      modelUsed: 'Motor local (sem Gemini)',
       diagnosis: `Você está em Aviso Condicional: suas contas 100% confirmadas cabem no saldo (menor saldo confirmado: ${contextPack.lowestConfirmedBalanceBRL}), porém os gastos estimados ou o horário do débito podem levar o saldo projetado a ${contextPack.lowestProjectedBalanceBRL}.`,
       actionPlan: [
         'Como o risco vem de despesas variáveis/estimadas, reduzir parte do consumo variável nos próximos dias já mantém sua conta no azul.',
@@ -692,7 +692,7 @@ function runLocalHybridAdvisorWithTools(
   if (contextPack.alertStatus === 'INSUFFICIENT_DATA') {
     return {
       mode: 'hybrid-local-engine',
-      modelUsed: 'gemini-2.5-flash (Context Pack)',
+      modelUsed: 'Motor local (sem Gemini)',
       diagnosis: `Ainda não há dados suficientes sincronizados para concluir sua projeção com segurança. Por responsabilidade, o Fôlego do Mês nunca emite um alerta falso nem garante cobertura quando faltam informações.`,
       actionPlan: [
         'Adicione seus principais compromissos manualmente no botão "Simular novo gasto" para testar como seu saldo de ' +
@@ -707,7 +707,7 @@ function runLocalHybridAdvisorWithTools(
 
   return {
     mode: 'hybrid-local-engine',
-    modelUsed: 'gemini-2.5-flash (Context Pack)',
+    modelUsed: 'Motor local (sem Gemini)',
     diagnosis: `Com base nos compromissos identificados até o momento, não encontramos falta de saldo no período. Seu menor saldo projetado é de ${contextPack.lowestProjectedBalanceBRL}, mantendo margem positiva sem tocar no cheque especial.`,
     actionPlan: [
       'Atenção: "sem insuficiência identificada" considera apenas as contas registradas e estimadas até agora — novos gastos no Pix ou cartão podem mudar esse cenário.',
