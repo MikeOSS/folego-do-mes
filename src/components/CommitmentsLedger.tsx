@@ -100,7 +100,7 @@ export const CommitmentsLedger: React.FC<CommitmentsLedgerProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <span className="text-[11px] font-mono-tabular uppercase tracking-[0.12em] text-[#8891a5] block mb-0.5">
-            Extrato Projetado · Toque em qualquer item para simular
+            Extrato Projetado · Selecione o nome para simular
           </span>
           <h2 className="text-base sm:text-lg font-bold tracking-[-0.02em] text-[#151a28]">
             Próximas movimentações ({evaluatedEntries.length})
@@ -370,16 +370,7 @@ const EntryRow: React.FC<EntryRowProps> = ({
 
   return (
     <div
-      onClick={onOpenEditor}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onOpenEditor();
-        }
-      }}
-      className={`group p-3 rounded-xl transition-all cursor-pointer ${
+      className={`group p-3 rounded-xl transition-all ${
         isSimulated
           ? 'bg-[#0064fd]/[0.04] ring-1 ring-[#0064fd]/20'
           : isIgnored
@@ -415,7 +406,7 @@ const EntryRow: React.FC<EntryRowProps> = ({
                   isIgnored ? 'line-through text-[#8891a5]' : ''
                 }`}
               >
-                {entry.title}
+                <button type="button" onClick={onOpenEditor} aria-label={`Simular ${entry.title}`} className="text-left hover:underline">{entry.title}</button>
               </h3>
               {renderStatusPill()}
             </div>
@@ -492,7 +483,7 @@ const EntryRow: React.FC<EntryRowProps> = ({
               />
             </div>
             <ChevronRight
-              onClick={onOpenEditor}
+              aria-hidden="true"
               className="w-4 h-4 text-[#8891a5] group-hover:text-[#0064fd] transition-colors"
             />
           </div>

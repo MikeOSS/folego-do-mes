@@ -14,11 +14,12 @@ const MainWorkspace: React.FC = () => {
 
   return (
     <div className="min-h-[100dvh] flex flex-col text-[#151a28]">
+      <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
       {/* Header Unificado com Logo, Seletor dos 7 Cenários e Acesso aos Slides */}
       <TopDemoRibbon />
 
       {/* Layout Assimétrico Editorial (Mobile: coluna única / Desktop: 5 cols fixas + 7 cols de análise) */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <main id="conteudo-principal" tabIndex={-1} className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Coluna Esquerda (Sticky no Desktop): Pulso do Mês + Transparência & Case */}
           <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4">

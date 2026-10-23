@@ -61,6 +61,7 @@ Lighthouse: Chromium Playwright, production preview local, uma execução mobile
 ## Revisões e entregas
 
 - Onda 0: revisão independente `review_wave0`; adicionada coleta console/HTTP e preset Lighthouse desktop após achados. Cobertura de estado inicial não é declarada como matriz integral de aceite.
+- Onda 1: skip link/main focável, seletor e simulador em dialog nativo com foco/Escape/inert/scroll lock/retorno; header em duas linhas mobile, controles >=44px, extrato com botão explícito em vez de interativos aninhados. Revisão `review_wave0`: corrigidos overflow do header e instrução antiga do extrato. Seis testes Playwright desktop/mobile passaram; capturas em `artifacts/ui/wave1`. Contraste e demais reflows tratados na Onda 3.
 
 ## Pendências de aceite humano
 

@@ -19,6 +19,7 @@ import {
 import { parseBRLInputToCents } from '../domain/money';
 import { addDaysISO, compareISODates, formatShortDatePT } from '../domain/date';
 import { shouldTriggerLatePenalty } from '../domain/engine';
+import { AccessibleDialog } from './ui/AccessibleDialog';
 
 interface SimulatorSheetProps {
   isCreatingNew: boolean;
@@ -107,18 +108,6 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
     onCloseCreateNew();
   };
 
-  useEffect(() => {
-    if (!isOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setEditingEntryId(null);
-        onCloseCreateNew();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, setEditingEntryId, onCloseCreateNew]);
-
   const handleApplyChanges = (e: React.FormEvent) => {
     e.preventDefault();
     const parsedCents = parseBRLInputToCents(amountInput);
@@ -167,14 +156,8 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-[#151a28]/45 backdrop-blur-xs p-0 sm:p-4"
-          onClick={handleClose}
-        >
+        <AccessibleDialog open={isOpen} onClose={handleClose} labelledBy="simulator-sheet-title" className="simulator-dialog">
           <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="simulator-sheet-title"
             initial={{ opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
@@ -513,7 +496,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
               </div>
             </form>
           </motion.div>
-        </div>
+        </AccessibleDialog>
       )}
     </AnimatePresence>
   );

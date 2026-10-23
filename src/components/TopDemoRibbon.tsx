@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { AccessibleDialog } from './ui/AccessibleDialog';
 import {
   ChevronDown,
   ChevronLeft,
@@ -47,21 +48,10 @@ export const TopDemoRibbon: React.FC = () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  useEffect(() => {
-    if (!drawerOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setDrawerOpen(false);
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [drawerOpen]);
-
   return (
     <header className="glass-bar sticky top-0 z-40 border-b border-[rgba(21,26,40,0.08)]">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between gap-3 h-[60px]">
+        <div className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 py-2 min-h-[60px]">
           {/* Esquerda: Marca Agi + Fôlego do Mês */}
           <div className="flex items-center gap-3 min-w-0">
             <a
@@ -92,9 +82,9 @@ export const TopDemoRibbon: React.FC = () => {
           </div>
 
           {/* Centro / Direita: Seletor Elegante de Persona & Cenário + Link para os Slides */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 w-full sm:w-auto min-w-0">
             {/* Pílula Seletora de Cenário */}
-            <div className="flex items-center rounded-full bg-white border border-[rgba(21,26,40,0.1)] p-0.5 shadow-2xs">
+            <div className="flex flex-1 min-w-0 items-center rounded-full bg-white border border-[rgba(21,26,40,0.1)] p-0.5 shadow-2xs">
               <button
                 type="button"
                 onClick={() => stepScenario('prev')}
@@ -108,7 +98,10 @@ export const TopDemoRibbon: React.FC = () => {
                 type="button"
                 onClick={() => setDrawerOpen((prev) => !prev)}
                 aria-expanded={drawerOpen}
-                className="flex items-center gap-2 px-2.5 py-1 rounded-full hover:bg-[#f0f2f7] transition-colors text-left cursor-pointer"
+                aria-controls="scenario-picker"
+                aria-haspopup="dialog"
+                aria-label={`Escolher cenário: ${activeScenario.personaName}`}
+                className="flex flex-1 min-w-0 items-center gap-1 px-1.5 py-1 rounded-full hover:bg-[#f0f2f7] transition-colors text-left cursor-pointer"
               >
                 <span
                   className={`w-2 h-2 rounded-full shrink-0 ${
@@ -158,7 +151,8 @@ export const TopDemoRibbon: React.FC = () => {
               href="/slides/index.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0064fd] hover:bg-[#0052d6] text-white text-xs font-semibold shadow-2xs transition-colors"
+              aria-label="Abrir apresentação (abre em nova aba)"
+                className="inline-flex items-center justify-center min-h-11 min-w-11 gap-1.5 px-3 py-1.5 rounded-full bg-[#0064fd] hover:bg-[#0052d6] text-white text-xs font-semibold shadow-2xs transition-colors"
               title="Abrir apresentação de slides do case (15 telas)"
             >
               <Presentation className="w-3.5 h-3.5" />
@@ -168,22 +162,22 @@ export const TopDemoRibbon: React.FC = () => {
         </div>
 
         {/* Painel Claro e Editorial de Seleção dos 7 Cenários */}
-        {drawerOpen && (
-          <div className="py-4 border-t border-[rgba(21,26,40,0.08)] space-y-3">
+        <AccessibleDialog id="scenario-picker" open={drawerOpen} onClose={() => setDrawerOpen(false)} labelledBy="scenario-picker-title" className="scenario-dialog">
+          <div className="p-5 space-y-4">
             <div className="flex items-center justify-between">
-              <span className="label-caps">
-                Cenários demonstrativos · Escolha uma situação para testar
-              </span>
+              <h2 id="scenario-picker-title" className="text-lg font-semibold">Escolher cenário demonstrativo</h2>
               <button
                 type="button"
                 onClick={() => setDrawerOpen(false)}
+                aria-label="Fechar menu de cenários"
                 className="text-xs font-medium text-[#0064fd] hover:underline cursor-pointer"
               >
                 Fechar
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 max-h-[68vh] overflow-y-auto pb-1">
+            <p className="text-sm text-[#525b6e]">Dados fictícios para demonstração. Escolha uma situação para testar.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pb-1">
               {scenarios.map((scen) => {
                 const isSelected = scen.id === activeScenario.id;
                 const badge = STATUS_LABEL_MAP[scen.expectedAlert];
@@ -224,7 +218,7 @@ export const TopDemoRibbon: React.FC = () => {
               })}
             </div>
           </div>
-        )}
+        </AccessibleDialog>
       </div>
     </header>
   );

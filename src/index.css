@@ -57,9 +57,25 @@
   }
 
   :focus-visible {
-    outline: 2px solid rgba(0, 100, 253, 0.65);
-    outline-offset: 2px;
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
   }
+
+  button, input:not([type="checkbox"]), select, textarea {
+    min-height: 44px;
+  }
+  button { min-width: 44px; }
+}
+
+.skip-link { position: fixed; top: 8px; left: 8px; z-index: 100; padding: 12px 16px; background: var(--text); color: white; border-radius: 8px; transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+.accessible-dialog { margin: auto; padding: 0; border: 1px solid var(--border-strong); border-radius: 16px; background: var(--surface); color: var(--text); max-height: calc(100dvh - 32px); max-width: calc(100vw - 32px); overflow-y: auto; overscroll-behavior: contain; }
+.accessible-dialog::backdrop { background: rgb(21 26 40 / 55%); }
+.scenario-dialog { width: 960px; }
+.simulator-dialog { width: 512px; }
+@media (max-width: 639px) {
+  .simulator-dialog { margin-bottom: 0; max-width: 100%; max-height: 94dvh; border-radius: 16px 16px 0 0; }
+  .simulator-dialog form { padding-bottom: max(20px, env(safe-area-inset-bottom)); }
 }
 
 .font-tabular {
