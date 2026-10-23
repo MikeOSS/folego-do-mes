@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
 import {
   AlertTriangle,
   Calendar,
@@ -16,7 +16,7 @@ import {
   EntryStatus,
   EntryType,
 } from '../domain/types';
-import { parseBRLInputToCents } from '../domain/money';
+import { validateMoneyInput } from '../lib/financial-input';
 import { addDaysISO, compareISODates, formatShortDatePT } from '../domain/date';
 import { shouldTriggerLatePenalty } from '../domain/engine';
 import { AccessibleDialog } from './ui/AccessibleDialog';
@@ -75,8 +75,11 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
   const [status, setStatus] = useState<EntryStatus>('pending');
   const [origin, setOrigin] = useState<EntryOrigin>('manual');
   const [affectsMonitoredAccount, setAffectsMonitoredAccount] = useState(true);
+  const formId = useId();
+  const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
+    setFormError(null);
     if (evaluatedTarget) {
       const e = evaluatedTarget.entry;
       setTitle(e.title);
@@ -110,8 +113,11 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
 
   const handleApplyChanges = (e: React.FormEvent) => {
     e.preventDefault();
-    const parsedCents = parseBRLInputToCents(amountInput);
-    if (parsedCents === null || parsedCents <= 0) return;
+    const parsedCents = validateMoneyInput(amountInput);
+    if (parsedCents === null || parsedCents <= 0) {
+      setFormError('Informe um valor maior que zero, até R$ 100 milhões, com até duas casas decimais. Exemplo: 250,00.');
+      return;
+    }
 
     if (isCreatingNew) {
       addSimulatedEntry({
@@ -163,10 +169,10 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.18 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl border border-[#151a28]/10 shadow-2xl overflow-hidden max-h-[90dvh] flex flex-col"
+            className="w-full min-w-0 max-w-lg bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden max-h-[90dvh] flex flex-col"
           >
             {/* Cabeçalho Limpo e Luminoso */}
-            <div className="px-5 py-4 flex items-center justify-between border-b border-[#151a28]/8">
+            <div className="px-5 py-4 flex shrink-0 items-center justify-between gap-2 border-b border-[#151a28]/8">
               <div className="min-w-0">
                 <span className="text-[11px] font-mono-tabular uppercase tracking-[0.12em] text-[#0064fd] font-semibold block">
                   {isCreatingNew
@@ -194,7 +200,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
             </div>
 
             {/* Nota de Segurança e Escopo */}
-            <div className="px-5 py-2.5 bg-[#f8f9fc] border-b border-[#151a28]/6 flex items-start gap-2 text-xs text-[#525b6e]">
+            <div className="px-5 py-2.5 shrink-0 bg-[#f8f9fc] border-b border-[#151a28]/6 flex items-start gap-2 text-xs text-[#525b6e]">
               <Info className="w-3.5 h-3.5 text-[#0064fd] shrink-0 mt-0.5" />
               <span>
                 Alterações simuladas recalculam seu fôlego na hora, mas{' '}
@@ -207,7 +213,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
 
             <form
               onSubmit={handleApplyChanges}
-              className="p-5 overflow-y-auto space-y-4 text-xs sm:text-sm"
+              className="p-5 min-h-0 overflow-y-auto space-y-4 text-xs sm:text-sm"
             >
               {/* Atalhos Rápidos de 1 Toque */}
               {!isCreatingNew && evaluatedTarget && (
@@ -278,13 +284,14 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
               {/* Seletor Saída vs Entrada (Ao criar novo) */}
               {isCreatingNew && (
                 <div>
-                  <label className="block text-xs font-semibold text-[#151a28] mb-1.5">
+                  <span id={`${formId}-type`} className="block text-xs font-semibold text-[#151a28] mb-1.5">
                     Tipo de movimentação
-                  </label>
-                  <div className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[#f1f4f9]">
+                  </span>
+                  <div role="group" aria-labelledby={`${formId}-type`} className="grid grid-cols-2 gap-2 p-1 rounded-xl bg-[#f1f4f9]">
                     <button
                       type="button"
-                      onClick={() => setType('outflow')}
+                      aria-pressed={type === 'outflow'}
+                      onClick={() => { setType('outflow'); if (certainty === 'uncertain') setCertainty('confirmed'); }}
                       className={`py-2 px-3 rounded-lg font-semibold text-xs transition-all cursor-pointer ${
                         type === 'outflow'
                           ? 'bg-white text-[#151a28] shadow-xs'
@@ -296,6 +303,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                     <button
                       type="button"
                       onClick={() => setType('inflow')}
+                      aria-pressed={type === 'inflow'}
                       className={`py-2 px-3 rounded-lg font-semibold text-xs transition-all cursor-pointer ${
                         type === 'inflow'
                           ? 'bg-white text-[#168030] shadow-xs'
@@ -310,10 +318,11 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
 
               {/* Descrição */}
               <div>
-                <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                <label htmlFor={`${formId}-title`} className="block text-xs font-semibold text-[#151a28] mb-1">
                   Descrição
                 </label>
                 <input
+                  id={`${formId}-title`}
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -326,10 +335,13 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
               {/* Valor e Data */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                  <label htmlFor={`${formId}-amount`} className="block text-xs font-semibold text-[#151a28] mb-1">
                     Valor (R$)
                   </label>
                   <input
+                    id={`${formId}-amount`}
+                    aria-invalid={Boolean(formError)}
+                    aria-describedby={formError ? `${formId}-error` : undefined}
                     type="text"
                     inputMode="decimal"
                     value={amountInput}
@@ -340,10 +352,11 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                  <label htmlFor={`${formId}-date`} className="block text-xs font-semibold text-[#151a28] mb-1">
                     Data na simulação
                   </label>
                   <input
+                    id={`${formId}-date`}
                     type="date"
                     value={effectiveDate}
                     min={activeScenario.snapshot.referenceDate}
@@ -376,10 +389,11 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
               {/* Status e Certeza */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                  <label htmlFor={`${formId}-status`} className="block text-xs font-semibold text-[#151a28] mb-1">
                     Situação do pagamento
                   </label>
                   <select
+                    id={`${formId}-status`}
                     value={status}
                     onChange={(e) => setStatus(e.target.value as EntryStatus)}
                     className="w-full px-3 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] text-[#151a28] text-xs font-medium focus:outline-none focus:border-[#0064fd]"
@@ -394,10 +408,11 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                  <label htmlFor={`${formId}-certainty`} className="block text-xs font-semibold text-[#151a28] mb-1">
                     Grau de certeza
                   </label>
                   <select
+                    id={`${formId}-certainty`}
                     value={certainty}
                     onChange={(e) => setCertainty(e.target.value as CertaintyLevel)}
                     className="w-full px-3 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] text-[#151a28] text-xs font-medium focus:outline-none focus:border-[#0064fd]"
@@ -414,10 +429,11 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
               {/* Origem & Conta Monitorada */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
                 <div>
-                  <label className="block text-xs font-semibold text-[#151a28] mb-1">
+                  <label htmlFor={`${formId}-origin`} className="block text-xs font-semibold text-[#151a28] mb-1">
                     Origem do registro
                   </label>
                   <select
+                    id={`${formId}-origin`}
                     value={origin}
                     onChange={(e) => setOrigin(e.target.value as EntryOrigin)}
                     className="w-full px-3 py-2.5 rounded-xl border border-[#151a28]/12 bg-[#f8f9fc] text-[#151a28] text-xs font-medium focus:outline-none focus:border-[#0064fd]"
@@ -445,6 +461,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
               </div>
 
               {/* Rodapé do Modal */}
+              {formError && <p id={`${formId}-error`} role="alert" className="text-sm text-[#c93535]">{formError}</p>}
               <div className="pt-4 border-t border-[#151a28]/8 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   {!isCreatingNew &&

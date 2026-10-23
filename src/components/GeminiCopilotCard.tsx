@@ -240,14 +240,14 @@ export const GeminiCopilotCard: React.FC = () => {
       </div>
 
       {/* Campo de Linguagem Natural */}
-      <form onSubmit={handleFormSubmit} className="flex items-center gap-2">
+      <form onSubmit={handleFormSubmit} className="flex flex-col sm:flex-row sm:items-center gap-2">
         <input
           type="text"
           value={promptInput}
           onChange={(e) => setPromptInput(e.target.value)}
           disabled={isLoading}
           placeholder='Peça uma análise ou simule (ex: "Já paguei o aluguel em outro banco" ou "Adie para o dia do salário")...'
-          className="flex-1 px-4 py-2.5 rounded-full border border-[#151a28]/12 bg-[#f8f9fc] focus:bg-white text-xs sm:text-sm text-[#151a28] placeholder:text-[#8891a5] focus:outline-none focus:border-[#0064fd] transition-colors"
+          className="flex-1 min-w-0 w-full px-4 py-2.5 rounded-full border border-[#151a28]/12 bg-[#f8f9fc] focus:bg-white text-xs sm:text-sm text-[#151a28] placeholder:text-[#8891a5] focus:outline-none focus:border-[#0064fd] transition-colors"
         />
         <button
           type="submit"

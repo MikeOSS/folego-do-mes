@@ -185,6 +185,7 @@ export const TopDemoRibbon: React.FC = () => {
                   <button
                     key={scen.id}
                     type="button"
+                    aria-pressed={isSelected}
                     onClick={() => {
                       selectScenario(scen.id);
                       setDrawerOpen(false);

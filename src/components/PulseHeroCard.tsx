@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import { Plus, RotateCcw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useFinancialStore } from '../state/useFinancialStore';
 import { AlertStatus } from '../domain/types';
-import { formatBRL, parseBRLInputToCents } from '../domain/money';
+import { formatBRL } from '../domain/money';
+import { validateMoneyInput } from '../lib/financial-input';
 import { formatShortDatePT } from '../domain/date';
 import { CurrencyDisplay } from './CurrencyDisplay';
 
@@ -56,12 +57,16 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
 
   const [editingBalance, setEditingBalance] = useState(false);
   const [balanceInput, setBalanceInput] = useState('');
+  const balanceId = useId();
+  const [balanceError, setBalanceError] = useState<string | null>(null);
+  useEffect(() => { setEditingBalance(false); setBalanceError(null); }, [activeScenario.id]);
 
   const { alertStatus, headline, explanation, metrics, actionableHints } =
     activeProjection;
   const pill = STATUS_PILL_CONFIG[alertStatus];
 
   const handleOpenBalanceEdit = () => {
+    setBalanceError(null);
     const current = effectiveSnapshot.availableBalanceCents;
     setBalanceInput(
       current !== null ? (current / 100).toFixed(2).replace('.', ',') : '1500,00'
@@ -71,10 +76,13 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
 
   const handleSaveBalance = (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = parseBRLInputToCents(balanceInput);
+    const parsed = validateMoneyInput(balanceInput);
     if (parsed !== null) {
       setBalanceOverride(parsed, true);
       setEditingBalance(false);
+      setBalanceError(null);
+    } else {
+      setBalanceError('Informe um saldo válido em reais, com até duas casas decimais e até R$ 100 milhões em módulo. Exemplo: 1.500,00.');
     }
   };
 
@@ -131,6 +139,8 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
                   </strong>
                   .
                 </span>
+              ) : simulationDelta.lowestBalanceGainCents < 0 ? (
+                <span>Seu menor saldo projetado caiu {formatBRL(Math.abs(simulationDelta.lowestBalanceGainCents))} em relação à base. Compare as contas antes de decidir.</span>
               ) : (
                 <span>
                   Simular não altera agendamentos reais no banco.
@@ -235,6 +245,10 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs text-[rgba(21,26,40,0.5)]">R$</span>
                   <input
+                    id={balanceId}
+                    aria-label="Saldo disponível para simular (R$)"
+                    aria-invalid={Boolean(balanceError)}
+                    aria-describedby={balanceError ? `${balanceId}-error` : undefined}
                     type="text"
                     inputMode="decimal"
                     value={balanceInput}
@@ -252,7 +266,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setEditingBalance(false)}
+                    onClick={() => { setEditingBalance(false); setBalanceError(null); }}
                     className="px-2.5 py-1 rounded-full bg-[#f0f2f7] text-[rgba(21,26,40,0.7)] text-xs cursor-pointer"
                   >
                     Cancelar
@@ -283,11 +297,14 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
           onSubmit={handleSaveBalance}
           className="p-4 rounded-[12px] bg-[#f8f9fc] border border-[rgba(0,100,253,0.25)] space-y-3"
         >
-          <label className="block text-xs font-semibold text-[#151a28]">
+          <label htmlFor={balanceId} className="block text-xs font-semibold text-[#151a28]">
             Informe o saldo disponível para simular (R$)
           </label>
           <div className="flex items-center gap-2">
             <input
+              id={balanceId}
+              aria-invalid={Boolean(balanceError)}
+              aria-describedby={balanceError ? `${balanceId}-error` : undefined}
               type="text"
               inputMode="decimal"
               value={balanceInput}
@@ -306,6 +323,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
       )}
 
       {/* Diagnóstico Humano e Direto */}
+      {balanceError && <p id={`${balanceId}-error`} role="alert" className="text-sm text-[#c93535]">{balanceError}</p>}
       <motion.div
         key={`${activeScenario.id}-${alertStatus}`}
         initial={{ opacity: 0, y: 4 }}

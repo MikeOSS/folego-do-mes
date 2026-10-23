@@ -62,6 +62,7 @@ Lighthouse: Chromium Playwright, production preview local, uma execução mobile
 
 - Onda 0: revisão independente `review_wave0`; adicionada coleta console/HTTP e preset Lighthouse desktop após achados. Cobertura de estado inicial não é declarada como matriz integral de aceite.
 - Onda 1: skip link/main focável, seletor e simulador em dialog nativo com foco/Escape/inert/scroll lock/retorno; header em duas linhas mobile, controles >=44px, extrato com botão explícito em vez de interativos aninhados. Revisão `review_wave0`: corrigidos overflow do header e instrução antiga do extrato. Seis testes Playwright desktop/mobile passaram; capturas em `artifacts/ui/wave1`. Contraste e demais reflows tratados na Onda 3.
+- Onda 2: labels estáveis em todos os campos financeiros, seleção programática de cenário/tipo, validação de BRL e comparativo negativo em texto. Revisão independente encontrou valor extremo capaz de estourar a soma; UI agora limita entradas a R$ 100 milhões em módulo (motor intacto). Erro é limpo ao cancelar. Corrigidos reflow do formulário do consultor e encolhimento do form do simulador após falha E2E mobile reproduzível. Seis E2E de formulário e 22 testes financeiros aprovados. Capturas `artifacts/ui/wave2`.
 
 ## Pendências de aceite humano
 
