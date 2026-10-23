@@ -1,7 +1,6 @@
 import {
   AccountSnapshot,
   AlertStatus,
-  Cents,
   CriticalMilestone,
   DailyProjection,
   EntryOrigin,
