@@ -127,7 +127,7 @@ export const GeminiCopilotCard: React.FC = () => {
                 Copiloto Gemini · Simulação Inteligente
               </h2>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#0064fd]/10 text-[#0064fd] text-[10px] font-mono-tabular font-semibold">
-                gemini-2.5-flash · Function Calling
+                Gemini quando disponível · modo local alternativo
               </span>
             </div>
             <p className="text-xs text-[#525b6e]">
@@ -215,7 +215,7 @@ export const GeminiCopilotCard: React.FC = () => {
             <span className="font-mono-tabular font-semibold text-[#2fc750]">
               CONTEXT PACK FECHADO · ENVIADO AO GEMINI-2.5-FLASH
             </span>
-            <span>Zero alucinação matemática</span>
+            <span>Cálculo financeiro pelo motor</span>
           </div>
           <pre className="font-mono-tabular text-[11px] leading-relaxed overflow-x-auto max-h-52 text-slate-300">
             {JSON.stringify(contextPack, null, 2)}
@@ -262,7 +262,7 @@ export const GeminiCopilotCard: React.FC = () => {
           ) : (
             <>
               <Send className="w-3.5 h-3.5" />
-              <span>Enviar ao Gemini</span>
+              <span>Analisar ou simular</span>
             </>
           )}
         </button>
@@ -282,7 +282,7 @@ export const GeminiCopilotCard: React.FC = () => {
                   <div className="flex items-center gap-2 font-medium">
                     <Terminal className="w-3.5 h-3.5 shrink-0" />
                     <span>
-                      <strong>Function Call executada:</strong> {tool.summary}
+                      <strong>{advisorResponse.mode === 'hybrid-local-engine' ? 'Simulação local executada:' : 'Função solicitada pela IA:'}</strong> {tool.summary}
                     </span>
                   </div>
                   <span className="font-mono-tabular text-[10px] px-2 py-0.5 rounded bg-white/80 text-[#151a28]">
