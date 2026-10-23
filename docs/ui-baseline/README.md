@@ -92,7 +92,26 @@ Entregas feitas por commits sequenciais em `main` e push por onda, conforme soli
 
 ## Publicação
 
-Projeto e scope novamente conferidos antes do deploy. A publicação final será registrada após a validação do build remoto e a promoção do mesmo deployment testado. `polish-ui.md`, credenciais e artefatos locais estão excluídos também do upload da CLI por `.vercelignore`.
+Produção: **https://folego-do-mes.vercel.app/**. Commit da implementação: `759d8312955f7b44ef1c135f6ce032f313a1b556`; branch `main`; deployment `dpl_83yNg4ufyzEPwqhXKhiY7wAPCmFC`, **READY / PROMOTED**, build remoto de 29s. O registro posterior de documentação não altera os artefatos da aplicação.
+
+O mesmo deployment passou primeiro por teste autenticado no navegador: sete cenários × desktop/mobile, menu, simulação, tabela, axe sem violações e consulta real ao endpoint. Após a promoção, **30 testes de navegador passaram na URL pública**. A API real retornou 503 por ausência de chave Gemini; a orientação local foi apresentada corretamente, sem simular resposta generativa ao vivo. O teste de IA saudável usa mock, explicitamente identificado nos testes.
+
+[CI da implementação aprovado](https://github.com/MikeOSS/folego-do-mes/actions/runs/40033970525): 31 testes unitários, 66 verificações de navegador, nove baselines visuais, 36 capturas da auditoria, zero overflow/axe/erros JS. Lighthouse no runner: performance mobile 95, desktop 100; acessibilidade 100 em ambos. Esses números são do runner e não substituem a comparação local da tabela acima. Dados: [ci.json](ci.json) e [release.json](release.json).
+
+Consulta de logs do deployment após publicação: zero registros runtime de nível `error` observados na janela de uma hora. Isso não certifica monitoramento contínuo; Web Vitals de usuários reais e dispositivos/leitores físicos continuam pendentes. Projeto e scope foram conferidos antes do deploy, e o alias foi consultado pela API para confirmar o SHA publicado.
+
+`polish-ui.md` permanece somente local, nunca foi rastreado pelo Git e também está excluído do upload da CLI, junto a credenciais e artefatos, por `.vercelignore`.
+
+| Onda | Commit enviado |
+| --- | --- |
+| 0 | `36c8468` |
+| 1 | `4b82619` |
+| 2 | `d7d7c7d` |
+| 3 | `8aaf8ec` |
+| 4 | `7fb4cde` |
+| 5 | `7d9c142` |
+| 6 | `98182ef` |
+| 7 | `759d831` |
 
 ## Pendências de aceite humano
 

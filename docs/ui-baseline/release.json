@@ -1,0 +1,39 @@
+{
+  "verifiedAt": "2026-10-23T22:38:01.502Z",
+  "DEPLOY_URL": "https://folego-do-mes.vercel.app/",
+  "implementationCommit": "759d8312955f7b44ef1c135f6ce032f313a1b556",
+  "branch": "main",
+  "deploymentId": "dpl_83yNg4ufyzEPwqhXKhiY7wAPCmFC",
+  "deploymentUrl": "https://folego-do-hbrhbensq-mikeoss-projects.vercel.app",
+  "target": "production",
+  "state": "READY",
+  "substate": "PROMOTED",
+  "framework": "Vite / React",
+  "buildDurationMs": 28985,
+  "ci": "https://github.com/MikeOSS/folego-do-mes/actions/runs/40033970525",
+  "stagedValidation": {
+    "deployment": "https://folego-do-hbrhbensq-mikeoss-projects.vercel.app",
+    "scenarioViewportCases": 14,
+    "menu": true,
+    "simulation": true,
+    "chartTable": true,
+    "axeViolations": 0,
+    "advisorStatus": "Resposta local · sem IA generativa",
+    "apiStatuses": [
+      503
+    ],
+    "errors": [],
+    "date": "2026-10-23T22:34:13.949Z"
+  },
+  "postPromotionBrowserTests": 30,
+  "runtimeErrorRecordsObserved": 0,
+  "runtimeLogWindow": "1h",
+  "productionAdvisor": "Local fallback; API returned 503 (no server Gemini key)",
+  "manualAcceptancePending": [
+    "NVDA/VoiceOver",
+    "physical iOS/Android/Safari",
+    "native browser zoom 200%",
+    "human visual acceptance",
+    "field Web Vitals p75"
+  ]
+}

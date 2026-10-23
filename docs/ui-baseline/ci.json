@@ -1,0 +1,48 @@
+{
+  "url": "https://github.com/MikeOSS/folego-do-mes/actions/runs/40033970525",
+  "commit": "759d8312955f7b44ef1c135f6ce032f313a1b556",
+  "conclusion": "success",
+  "tests": {
+    "unit": 31,
+    "browserPassed": 66,
+    "browserIntentionallySkipped": 10
+  },
+  "audit": {
+    "screenshots": 36,
+    "overflow": 0,
+    "violations": [],
+    "errors": []
+  },
+  "lighthouse": {
+    "mobile": {
+      "categories": {
+        "performance": 0.95,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "first-contentful-paint": 1710,
+        "largest-contentful-paint": 2340,
+        "cumulative-layout-shift": 0.0003507164759329432,
+        "total-blocking-time": 150,
+        "speed-index": 1710
+      }
+    },
+    "desktop": {
+      "categories": {
+        "performance": 1,
+        "accessibility": 1,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "first-contentful-paint": 403.7929,
+        "largest-contentful-paint": 483.7929,
+        "cumulative-layout-shift": 0,
+        "total-blocking-time": 0,
+        "speed-index": 403.7929
+      }
+    }
+  }
+}
