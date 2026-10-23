@@ -6,6 +6,7 @@ import { formatShortDatePT, getWeekdayShortPT } from '../domain/date';
 import { CurrencyDisplay } from './CurrencyDisplay';
 import { Disclosure } from './ui/Disclosure';
 import { SourceNote } from './ui/SourceNote';
+import { useReducedMotion } from 'motion/react';
 
 const SVG_WIDTH = 760;
 const SVG_HEIGHT = 230;
@@ -37,6 +38,14 @@ function buildStepAfterAreaPath(
 }
 
 export const LiquidityStepChart: React.FC = () => {
+  const reducedMotion = useReducedMotion();
+  const revealLedgerDay = (date: string) => {
+    const heading = document.getElementById(`ledger-heading-${date}`);
+    if (heading) {
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView({ behavior: reducedMotion ? 'instant' : 'smooth', block: 'center' });
+    }
+  };
   const {
     activeProjection,
     baselineProjection,
@@ -505,10 +514,7 @@ export const LiquidityStepChart: React.FC = () => {
                 }}
                 onClick={() => {
                   setSelectedDate(day.date);
-                  const el = document.getElementById(`ledger-day-${day.date}`);
-                  if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
+                  revealLedgerDay(day.date);
                 }}
               />
             );
@@ -550,10 +556,7 @@ export const LiquidityStepChart: React.FC = () => {
                 aria-pressed={isSelected}
                 onClick={() => {
                   setSelectedDate(m.date);
-                  const el = document.getElementById(`ledger-day-${m.date}`);
-                  if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }
+                  revealLedgerDay(m.date);
                 }}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium shrink-0 transition-all cursor-pointer border ${
                   isSelected

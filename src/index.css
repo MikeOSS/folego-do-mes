@@ -133,6 +133,7 @@ button { overflow-wrap: anywhere; }
 }
 
 .surface-raised {
+  scroll-margin-top: 140px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);

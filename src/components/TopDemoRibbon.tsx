@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AccessibleDialog } from './ui/AccessibleDialog';
 import { PRODUCT } from '../lib/product';
 import {
@@ -48,6 +48,11 @@ export const TopDemoRibbon: React.FC = () => {
   } = useFinancialStore();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  useEffect(()=>{
+    const closeMenu=()=>setDrawerOpen(false);
+    window.addEventListener('folego:scenario-change',closeMenu);
+    return ()=>window.removeEventListener('folego:scenario-change',closeMenu);
+  },[]);
 
   return (
     <header className="glass-bar sticky top-0 z-40 border-b border-[rgba(21,26,40,0.08)]">

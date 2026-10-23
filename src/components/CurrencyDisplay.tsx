@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Cents } from '../domain/types';
 import { splitBRLParts } from '../domain/money';
 
@@ -20,6 +20,7 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   showPlusSign = false,
   compactSymbol = true,
 }) => {
+  const reducedMotion = useReducedMotion();
   const { sign, integerPart, decimalPart } = splitBRLParts(cents);
   const displaySign = sign === '-' ? '−' : showPlusSign && cents > 0 ? '+' : '';
 
@@ -27,9 +28,9 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
     return (
       <motion.span
         key={cents}
-        initial={{ opacity: 0.7, y: 2 }}
+        initial={reducedMotion ? false : { opacity: 0.7, y: 2 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.16 }}
+        transition={{ duration: reducedMotion ? 0 : 0.12 }}
         className={`font-tabular whitespace-nowrap ${className}`}
       >
         {displaySign}R$ {integerPart}
@@ -41,9 +42,9 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
   return (
     <motion.span
       key={cents}
-      initial={{ opacity: 0.7, y: 2 }}
+      initial={reducedMotion ? false : { opacity: 0.7, y: 2 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.16 }}
+      transition={{ duration: reducedMotion ? 0 : 0.12 }}
       className={`font-tabular inline-flex items-baseline whitespace-nowrap ${className}`}
     >
       {displaySign && <span className="mr-0.5">{displaySign}</span>}

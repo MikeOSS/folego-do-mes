@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { DEMO_SCENARIOS, DemoScenario } from '../data/scenarios';
 import { projectLiquidity } from '../domain/engine';
 import {
@@ -88,6 +88,8 @@ export const FinancialStoreProvider: React.FC<{ children: React.ReactNode }> = (
   children,
 }) => {
   const [activeScenarioId, setActiveScenarioId] = useState<string>(getInitialScenarioId);
+  const scenarioIdRef = useRef(activeScenarioId);
+  scenarioIdRef.current = activeScenarioId;
   const [entryOverrides, setEntryOverrides] = useState<Record<string, EntryOverride>>({});
   const [addedEntries, setAddedEntries] = useState<FinancialEntry[]>([]);
   const [balanceOverrideCents, setBalanceOverrideCents] = useState<Cents | null>(null);
@@ -110,6 +112,8 @@ export const FinancialStoreProvider: React.FC<{ children: React.ReactNode }> = (
   }, []);
 
   const selectScenario = useCallback((scenarioId: string) => {
+    if (!DEMO_SCENARIOS.some(scenario=>scenario.id===scenarioId)) return;
+    if (scenarioIdRef.current === scenarioId) return;
     setActiveScenarioId(scenarioId);
     setEntryOverrides({});
     setAddedEntries([]);
@@ -121,9 +125,25 @@ export const FinancialStoreProvider: React.FC<{ children: React.ReactNode }> = (
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       url.searchParams.set('cenario', scenarioId);
-      window.history.replaceState({}, '', url.toString());
+      if (url.toString() !== window.location.href) window.history.pushState({}, '', url.toString());
+      window.dispatchEvent(new Event('folego:scenario-change'));
     }
   }, []);
+
+  useEffect(()=>{
+    const restoreFromHistory=()=>{
+      const nextId = getInitialScenarioId();
+      if (nextId === scenarioIdRef.current) return;
+      setActiveScenarioId(nextId);
+      resetAllSimulations();
+      setSelectedDate(null);
+      setEditingEntryId(null);
+      window.dispatchEvent(new Event('folego:scenario-change'));
+      document.getElementById('conteudo-principal')?.focus({preventScroll:true});
+    };
+    window.addEventListener('popstate',restoreFromHistory);
+    return ()=>window.removeEventListener('popstate',restoreFromHistory);
+  },[resetAllSimulations]);
 
   const stepScenario = useCallback(
     (direction: 'prev' | 'next') => {

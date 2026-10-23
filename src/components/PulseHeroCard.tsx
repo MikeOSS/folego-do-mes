@@ -1,6 +1,6 @@
 import React, { useEffect, useId, useState } from 'react';
 import { Plus, RotateCcw } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useFinancialStore } from '../state/useFinancialStore';
 import { AlertStatus } from '../domain/types';
 import { formatBRL } from '../domain/money';
@@ -46,6 +46,7 @@ interface PulseHeroCardProps {
 export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
   onOpenNewEntryModal,
 }) => {
+  const reducedMotion = useReducedMotion();
   const {
     activeScenario,
     effectiveSnapshot,
@@ -113,7 +114,8 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
       {/* Feedback de Simulação Ativa (Limpo, sem caixas escuras nem ícones clichês) */}
       {simulationDelta.hasChanges && (
         <motion.div
-          initial={{ opacity: 0, y: -4 }}
+          initial={reducedMotion ? false : { opacity: 0, y: -4 }}
+          transition={{ duration: reducedMotion ? 0 : 0.18 }}
           animate={{ opacity: 1, y: 0 }}
           className="p-3.5 rounded-[12px] bg-[rgba(0,100,253,0.06)] border border-[rgba(0,100,253,0.22)] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
@@ -332,9 +334,9 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
       {balanceError && <p id={`${balanceId}-error`} role="alert" className="text-sm text-danger">{balanceError}</p>}
       <motion.div
         key={`${activeScenario.id}-${alertStatus}`}
-        initial={{ opacity: 0, y: 4 }}
+        initial={reducedMotion ? false : { opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.18 }}
+        transition={{ duration: reducedMotion ? 0 : 0.18 }}
         aria-live="polite"
         aria-atomic="true"
         className="space-y-2"

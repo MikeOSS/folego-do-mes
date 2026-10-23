@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowUpRight, Presentation, ShieldCheck } from 'lucide-react';
 import { FinancialStoreProvider, useFinancialStore } from './state/useFinancialStore';
 import { TopDemoRibbon } from './components/TopDemoRibbon';
@@ -9,10 +9,17 @@ import { CommitmentsLedger } from './components/CommitmentsLedger';
 import { SimulatorSheet } from './components/SimulatorSheet';
 import { Disclosure } from './components/ui/Disclosure';
 import { PRODUCT } from './lib/product';
+import { MotionConfig } from 'motion/react';
+import { DemoGuide } from './components/DemoGuide';
 
 const MainWorkspace: React.FC = () => {
   const { activeProjection } = useFinancialStore();
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+  useEffect(()=>{
+    const closeCreation=()=>setIsCreatingNew(false);
+    window.addEventListener('folego:scenario-change',closeCreation);
+    return ()=>window.removeEventListener('folego:scenario-change',closeCreation);
+  },[]);
 
   return (
     <div className="min-h-[100dvh] flex flex-col text-[#151a28]">
@@ -22,13 +29,14 @@ const MainWorkspace: React.FC = () => {
 
       {/* Layout Assimétrico Editorial (Mobile: coluna única / Desktop: 5 cols fixas + 7 cols de análise) */}
       <main id="conteudo-principal" tabIndex={-1} className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <DemoGuide />
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Coluna Esquerda (Sticky no Desktop): Pulso do Mês + Transparência & Case */}
           <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4">
             <PulseHeroCard onOpenNewEntryModal={() => setIsCreatingNew(true)} />
 
             {/* Card de Transparência do Motor Determinístico & Acesso aos Slides do Case */}
-            <aside className="surface-raised p-5 space-y-4 text-xs text-muted">
+            <aside id="regras-calculo" className="surface-raised p-5 space-y-4 text-xs text-muted">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#168030] shrink-0" />
@@ -131,9 +139,11 @@ const MainWorkspace: React.FC = () => {
 
 export function App() {
   return (
+    <MotionConfig reducedMotion="user">
     <FinancialStoreProvider>
       <MainWorkspace />
     </FinancialStoreProvider>
+    </MotionConfig>
   );
 }
 

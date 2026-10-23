@@ -8,7 +8,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { useFinancialStore } from '../state/useFinancialStore';
 import {
   CertaintyLevel,
@@ -30,6 +30,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
   isCreatingNew,
   onCloseCreateNew,
 }) => {
+  const reducedMotion = useReducedMotion();
   const {
     activeScenario,
     activeProjection,
@@ -164,10 +165,10 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
       {isOpen && (
         <AccessibleDialog open={isOpen} onClose={handleClose} labelledBy="simulator-sheet-title" className="simulator-dialog">
           <motion.div
-            initial={{ opacity: 0, y: 28 }}
+            initial={reducedMotion ? false : { opacity: 0, y: 28 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.18 }}
+            exit={reducedMotion ? undefined : { opacity: 0, y: 20 }}
+            transition={{ duration: reducedMotion ? 0 : 0.18 }}
             onClick={(e) => e.stopPropagation()}
             className="w-full min-w-0 max-w-lg bg-white rounded-t-2xl sm:rounded-2xl overflow-hidden max-h-[90dvh] flex flex-col"
           >

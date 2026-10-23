@@ -183,9 +183,9 @@ export const CommitmentsLedger: React.FC<CommitmentsLedgerProps> = ({
                 {/* Divisor de Data e Saldo Projetado */}
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5 px-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[#151a28]">
+                    <h3 id={`ledger-heading-${day.date}`} tabIndex={-1} className="text-sm font-semibold text-[#151a28] scroll-mt-36">
                       {formatShortDatePT(day.date)}
-                    </span>
+                    </h3>
                     <span className="text-xs text-muted capitalize">
                       · {getWeekdayShortPT(day.date)}
                     </span>
@@ -405,13 +405,13 @@ const EntryRow: React.FC<EntryRowProps> = ({
 
           <div className="min-w-0 space-y-0.5">
             <div className="flex flex-wrap items-center gap-2">
-              <h3
+              <h4
                 className={`text-sm font-semibold text-[#151a28] leading-snug ${
                   isIgnored ? 'line-through text-muted' : ''
                 }`}
               >
                 <button type="button" onClick={onOpenEditor} aria-label={`Simular ${entry.title}`} className="text-left hover:underline">{entry.title}</button>
-              </h3>
+              </h4>
               {renderStatusPill()}
             </div>
 
