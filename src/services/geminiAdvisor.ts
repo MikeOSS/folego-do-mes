@@ -1,6 +1,7 @@
 import { FunctionDeclaration, GoogleGenAI, Type } from '@google/genai';
 import {
   CertaintyLevel,
+  AccountSnapshot,
   EntryType,
   ISODateString,
   ProjectionResult,
@@ -83,7 +84,8 @@ export interface FinancialContextPack {
 export function buildFinancialContextPack(
   scenario: DemoScenario,
   projection: ProjectionResult,
-  delta: SimulationDelta
+  delta: SimulationDelta,
+  snapshot: AccountSnapshot = scenario.snapshot,
 ): FinancialContextPack {
   const nextInflow = projection.evaluatedEntries.find(
     (ev) =>
@@ -111,12 +113,12 @@ export function buildFinancialContextPack(
     scenarioName: scenario.title,
     personaName: scenario.personaName,
     referenceDate: scenario.snapshot.referenceDate,
-    availableBalanceBRL: formatBRL(scenario.snapshot.availableBalanceCents ?? 0),
+    availableBalanceBRL: snapshot.availableBalanceCents === null ? 'Dado indisponível' : formatBRL(snapshot.availableBalanceCents),
     overdraftExcludedBRL: formatBRL(scenario.snapshot.overdraftLimitCents),
     alertStatus: projection.alertStatus,
     headline: projection.headline,
-    lowestConfirmedBalanceBRL: formatBRL(projection.metrics.lowestConfirmedBalanceCents),
-    lowestProjectedBalanceBRL: formatBRL(projection.metrics.lowestProjectedBalanceCents),
+    lowestConfirmedBalanceBRL: projection.alertStatus === 'INSUFFICIENT_DATA' ? 'Dado indisponível' : formatBRL(projection.metrics.lowestConfirmedBalanceCents),
+    lowestProjectedBalanceBRL: projection.alertStatus === 'INSUFFICIENT_DATA' ? 'Dado indisponível' : formatBRL(projection.metrics.lowestProjectedBalanceCents),
     firstShortfallDate: projection.metrics.firstShortfallDate,
     daysUntilShortfall: projection.metrics.daysUntilShortfall,
     mainCauseEntryTitle: mainCause?.entry.title ?? null,
@@ -129,7 +131,7 @@ export function buildFinancialContextPack(
       : null,
     simulationActive: {
       hasChanges: delta.hasChanges,
-      minProjectedDeltaBRL: formatBRL(delta.lowestBalanceGainCents, {
+      minProjectedDeltaBRL: scenario.snapshot.availableBalanceCents === null || !scenario.snapshot.hasCompleteData ? 'Comparação indisponível: base sem dados suficientes' : formatBRL(delta.lowestBalanceGainCents, {
         showPlusSign: true,
       }),
     },

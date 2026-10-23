@@ -20,6 +20,7 @@ import {
 import { formatBRL } from '../domain/money';
 import { formatShortDatePT, getWeekdayShortPT } from '../domain/date';
 import { CurrencyDisplay } from './CurrencyDisplay';
+import { SourceNote } from './ui/SourceNote';
 
 type FilterMode = 'all' | 'outflows' | 'inflows' | 'estimated_or_uncertain';
 
@@ -93,6 +94,7 @@ export const CommitmentsLedger: React.FC<CommitmentsLedgerProps> = ({
 
   return (
     <section
+      id="compromissos"
       aria-label="Linha do tempo de compromissos e recebimentos"
       className="surface-raised p-5 sm:p-6 space-y-5"
     >
@@ -116,6 +118,8 @@ export const CommitmentsLedger: React.FC<CommitmentsLedgerProps> = ({
           <span>Simular novo gasto</span>
         </button>
       </div>
+
+      <SourceNote referenceDate={activeScenario.snapshot.referenceDate}>Origens indicadas por lançamento. Estimativas e recebimentos incertos têm identificação própria.</SourceNote>
 
       {/* Filtros em Pílula Suave */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">

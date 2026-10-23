@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useId, useMemo } from 'react';
 import { useFinancialStore } from '../state/useFinancialStore';
 import { DailyProjection } from '../domain/types';
 import { formatBRL } from '../domain/money';
 import { formatShortDatePT, getWeekdayShortPT } from '../domain/date';
 import { CurrencyDisplay } from './CurrencyDisplay';
+import { Disclosure } from './ui/Disclosure';
+import { SourceNote } from './ui/SourceNote';
 
 const SVG_WIDTH = 760;
 const SVG_HEIGHT = 230;
@@ -41,9 +43,12 @@ export const LiquidityStepChart: React.FC = () => {
     simulationDelta,
     selectedDate,
     setSelectedDate,
+    activeScenario,
   } = useFinancialStore();
 
   const { alertStatus, dailySeries, metrics, milestones } = activeProjection;
+  const dateControlId = useId();
+  const hasValidBaseline = simulationDelta.hasChanges && baselineProjection.alertStatus !== 'INSUFFICIENT_DATA';
 
   const inspectedDay: DailyProjection | null = useMemo(() => {
     if (dailySeries.length === 0) return null;
@@ -86,7 +91,7 @@ export const LiquidityStepChart: React.FC = () => {
         allValues.push(d.closingOptimisticCents);
       }
     }
-    if (simulationDelta.hasChanges) {
+    if (hasValidBaseline) {
       for (const bd of baselineProjection.dailySeries) {
         allValues.push(bd.closingProjectedCents);
       }
@@ -125,7 +130,7 @@ export const LiquidityStepChart: React.FC = () => {
       day: d,
     }));
 
-    const baselineGhostPoints = baselineProjection.dailySeries.map((d) => ({
+    const baselineGhostPoints = (hasValidBaseline ? baselineProjection.dailySeries : []).map((d) => ({
       x: getX(d.dayIndex),
       y: getY(d.closingProjectedCents),
     }));
@@ -148,13 +153,13 @@ export const LiquidityStepChart: React.FC = () => {
   }, [
     dailySeries,
     metrics.totalUncertainInflowsCents,
-    simulationDelta.hasChanges,
+    hasValidBaseline,
     baselineProjection.dailySeries,
   ]);
 
   if (alertStatus === 'INSUFFICIENT_DATA' || !chartGeometry) {
     return (
-      <section className="surface-raised p-6 sm:p-7 space-y-3">
+      <section id="evolucao-saldo" className="surface-raised p-6 sm:p-7 space-y-3">
         <span className="label-caps">Evolução do saldo · 30 dias</span>
         <h2 className="text-base sm:text-lg font-semibold text-[#151a28]">
           Projeção aguardando confirmação de saldo
@@ -163,6 +168,7 @@ export const LiquidityStepChart: React.FC = () => {
           Informe um saldo disponível no painel lateral para visualizar a evolução dia a dia
           dos próximos compromissos.
         </p>
+        <SourceNote referenceDate={activeScenario.snapshot.referenceDate} />
       </section>
     );
   }
@@ -175,15 +181,15 @@ export const LiquidityStepChart: React.FC = () => {
 
   return (
     <section
+      id="evolucao-saldo"
       aria-label="Evolução do saldo nos próximos 30 dias"
       className="surface-raised p-6 sm:p-7 space-y-5"
     >
       {/* Topo Integrado: Leitor Vivo do Dia Inspecionado + Legenda Limpa */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <span className="label-caps">
-            Evolução do saldo · Próximos 30 dias
-          </span>
+          <h2 className="text-xl font-semibold">Evolução do saldo</h2>
+          <p className="label-caps">Próximos {activeScenario.snapshot.horizonDays} dias · Valores em R$</p>
 
           {inspectedDay && (
             <div className="mt-1.5 flex flex-wrap items-baseline gap-2.5">
@@ -265,6 +271,15 @@ export const LiquidityStepChart: React.FC = () => {
         </div>
       </div>
 
+      <SourceNote referenceDate={activeScenario.snapshot.referenceDate} />
+      <p className="text-sm text-muted">Menor saldo projetado: <strong>{formatBRL(metrics.lowestProjectedBalanceCents)}</strong> em {formatShortDatePT(metrics.lowestProjectedBalanceDate)}. {metrics.firstShortfallDate ? `Primeira insuficiência em ${formatShortDatePT(metrics.firstShortfallDate)}.` : 'Sem insuficiência projetada no período.'} O cenário com recebimentos incertos depende da confirmação dessas entradas.</p>
+      <div className="space-y-1">
+        <label htmlFor={dateControlId} className="text-sm font-semibold">Inspecionar uma data</label>
+        <select id={dateControlId} value={inspectedDay?.date || ''} onChange={event=>setSelectedDate(event.target.value)} className="block w-full rounded-lg border border-slate-300 p-2 text-sm bg-white">
+          {dailySeries.map(day=><option key={day.date} value={day.date}>{formatShortDatePT(day.date)} — saldo projetado {formatBRL(day.closingProjectedCents)}</option>)}
+        </select>
+      </div>
+
       {/* Gráfico SVG Step-After Limpo e Escultural */}
       <figure className="relative select-none">
         <figcaption className="sr-only">
@@ -324,8 +339,9 @@ export const LiquidityStepChart: React.FC = () => {
           />
 
           {/* Linha Fantasma do Original quando há Simulação Ativa */}
-          {simulationDelta.hasChanges && (
+          {hasValidBaseline && (
             <path
+              data-testid="baseline-curve"
               d={chartGeometry.baselineGhostPath}
               fill="none"
               stroke="rgba(21,26,40,0.28)"
@@ -499,6 +515,17 @@ export const LiquidityStepChart: React.FC = () => {
           })}
         </svg>
       </figure>
+
+      <Disclosure title="Ver dados da projeção em tabela">
+        <p>Confirmado: entradas e contas confirmadas. Projetado: inclui entradas e despesas estimadas. Com incertos: inclui recebimentos ainda não confirmados. A data pode ser inspecionada no controle acima.</p>
+        <div role="region" aria-label="Dados diários da projeção" tabIndex={0} className="overflow-x-auto max-h-96 rounded-lg border border-slate-200">
+          <table className="w-full min-w-[620px] text-xs text-left">
+            <caption className="text-left p-3 font-semibold">Saldos de fechamento em R$ · {formatShortDatePT(dailySeries[0].date)} a {formatShortDatePT(dailySeries[dailySeries.length-1].date)}</caption>
+            <thead className="bg-slate-100 sticky top-0"><tr><th scope="col" className="p-3">Data</th><th scope="col" className="p-3 text-right">Confirmado</th><th scope="col" className="p-3 text-right">Projetado</th><th scope="col" className="p-3 text-right">Com incertos</th>{simulationDelta.hasChanges && <th scope="col" className="p-3 text-right">Base original</th>}</tr></thead>
+            <tbody>{dailySeries.map(day=><tr key={day.date} className="border-t border-slate-200"><th scope="row" className="p-3 font-medium whitespace-nowrap">{formatShortDatePT(day.date)}</th>{[day.closingConfirmedCents,day.closingProjectedCents,day.closingOptimisticCents].map((value,index)=><td key={index} className={`p-3 text-right whitespace-nowrap font-mono-tabular ${value<0?'text-danger':''}`}>{formatBRL(value)}</td>)}{simulationDelta.hasChanges && <td className="p-3 text-right whitespace-nowrap font-mono-tabular">{baselineProjection.alertStatus === 'INSUFFICIENT_DATA' ? 'Dado indisponível' : formatBRL(baselineProjection.dailySeries.find(base=>base.date===day.date)!.closingProjectedCents)}</td>}</tr>)}</tbody>
+          </table>
+        </div>
+      </Disclosure>
 
       {/* Pílulas Minimalistas de Marcos Importantes */}
       {milestones.length > 0 && (

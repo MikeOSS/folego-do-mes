@@ -22,6 +22,7 @@ export const GeminiCopilotCard: React.FC = () => {
   const {
     activeScenario,
     activeProjection,
+    effectiveSnapshot,
     simulationDelta,
     updateEntryOverride,
     addSimulatedEntry,
@@ -44,9 +45,10 @@ export const GeminiCopilotCard: React.FC = () => {
       buildFinancialContextPack(
         activeScenario,
         activeProjection,
-        simulationDelta
+        simulationDelta,
+        effectiveSnapshot,
       ),
-    [activeScenario, activeProjection, simulationDelta]
+    [activeScenario, activeProjection, simulationDelta, effectiveSnapshot]
   );
 
   // Ao trocar de cenário, limpa a resposta anterior para incentivar nova análise ou gera resumo contextual

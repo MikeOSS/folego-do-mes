@@ -94,8 +94,8 @@ const MainWorkspace: React.FC = () => {
 
           {/* Coluna Direita: Copiloto Gemini (Function Calling) + Curva de Evolução + Extrato Projetado */}
           <div className="lg:col-span-7 space-y-6">
-            <GeminiCopilotCard />
             <LiquidityStepChart />
+            <GeminiCopilotCard />
             <CommitmentsLedger onOpenNewEntryModal={() => setIsCreatingNew(true)} />
           </div>
         </div>

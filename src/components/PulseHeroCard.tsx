@@ -7,6 +7,7 @@ import { formatBRL } from '../domain/money';
 import { validateMoneyInput } from '../lib/financial-input';
 import { formatShortDatePT } from '../domain/date';
 import { CurrencyDisplay } from './CurrencyDisplay';
+import { SourceNote } from './ui/SourceNote';
 
 const STATUS_PILL_CONFIG: Record<
   AlertStatus,
@@ -107,6 +108,8 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
         </span>
       </div>
 
+      <SourceNote referenceDate={effectiveSnapshot.referenceDate} />
+
       {/* Feedback de Simulação Ativa (Limpo, sem caixas escuras nem ícones clichês) */}
       {simulationDelta.hasChanges && (
         <motion.div
@@ -123,7 +126,9 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
               )
             </p>
             <p className="text-muted">
-              {simulationDelta.shortfallEliminated ? (
+              {baselineProjection.alertStatus === 'INSUFFICIENT_DATA' ? (
+                <span>Projeção iniciada com o saldo informado. A base original não tinha dados suficientes para comparação.</span>
+              ) : simulationDelta.shortfallEliminated ? (
                 <span>
                   O déficit que ocorreria em{' '}
                   <strong>
@@ -203,6 +208,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
 
             <div className="mt-2 text-xs text-muted">
               {simulationDelta.hasChanges &&
+              baselineProjection.alertStatus !== 'INSUFFICIENT_DATA' &&
               baselineProjection.metrics.lowestProjectedBalanceCents !==
                 metrics.lowestProjectedBalanceCents ? (
                 <span>
