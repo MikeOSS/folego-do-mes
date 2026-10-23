@@ -284,8 +284,8 @@
 
       .cover {
         display: grid;
-        grid-template-columns: 1.15fr 0.85fr;
-        gap: 36px;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: clamp(28px, 4vw, 56px);
         align-items: center;
       }
 
@@ -295,41 +295,237 @@
         justify-content: center;
       }
 
+      .cover-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        align-self: flex-start;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(--surface);
+        border: 1px solid var(--border-strong);
+        font-family: "Geist Mono", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 18px;
+        box-shadow: 0 2px 8px rgba(21, 26, 40, 0.04);
+      }
+
+      .cover-kicker .k-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--green);
+        box-shadow: 0 0 0 3px rgba(47, 199, 80, 0.18);
+      }
+
       .cover-copy .display {
-        font-size: clamp(54px, 6.8vw, 98px);
-        line-height: 0.96;
-        letter-spacing: -0.042em;
+        font-size: clamp(56px, 7.2vw, 104px);
+        line-height: 0.93;
+        letter-spacing: -0.045em;
         max-width: none;
       }
 
+      .cover-quote-bar {
+        margin-top: 20px;
+        padding: 4px 0 4px 16px;
+        border-left: 3px solid var(--accent);
+      }
+
       .cover-tagline {
-        margin: 18px 0 0;
-        font-size: clamp(20px, 2.2vw, 30px);
+        margin: 0;
+        font-size: clamp(19px, 2vw, 27px);
         font-weight: 600;
         letter-spacing: -0.02em;
+        color: var(--text);
+        line-height: 1.2;
+      }
+
+      .cover-tagline span {
         color: var(--accent);
-        line-height: 1.15;
       }
 
       .cover-lead {
-        margin-top: 18px;
-        max-width: 52ch;
+        margin-top: 16px;
+        max-width: 50ch;
+        font-size: clamp(14px, 1.15vw, 16.5px);
       }
 
-      .cover-signature {
+      .cover-author-dock {
         margin-top: 24px;
-        margin-bottom: 0;
-        align-self: flex-start;
-        font-size: 11px;
-        padding: 8px 14px;
-        opacity: 0.95;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
       }
 
-      .cover .right {
+      .cover-author-card {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 16px 10px 10px;
+        border-radius: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border-strong);
+        box-shadow: inset 0 1px 0 #fff, 0 8px 20px -8px rgba(21, 26, 40, 0.08);
+      }
+
+      .cover-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent), #0046b8);
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: -0.02em;
+      }
+
+      .cover-author-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .cover-author-meta .lbl {
+        font-size: 9px;
+        font-family: "Geist Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--muted-2);
+        font-weight: 600;
+      }
+
+      .cover-author-meta .nm {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.01em;
+      }
+
+      /* Showcase visual da direita na Capa */
+      .cover-showcase {
         position: relative;
-        min-height: 340px;
-        max-height: 400px;
-        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .showcase-window {
+        border-radius: 20px;
+        background: var(--surface);
+        border: 1px solid rgba(21, 26, 40, 0.11);
+        box-shadow:
+          inset 0 1px 0 #ffffff,
+          0 24px 60px -18px rgba(0, 100, 253, 0.16),
+          0 4px 16px -4px rgba(21, 26, 40, 0.06);
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .showcase-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .showcase-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(224, 69, 69, 0.1);
+        color: var(--red);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .showcase-badge.recovered {
+        background: var(--green-soft);
+        color: #168030;
+      }
+
+      .showcase-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .showcase-kpi {
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+      }
+
+      .showcase-kpi .k-lbl {
+        font-size: 9px;
+        font-family: "Geist Mono", monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted-2);
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .showcase-kpi .k-val {
+        font-size: 17px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.03em;
+        color: var(--text);
+      }
+
+      .showcase-kpi .k-val.red { color: var(--red); }
+      .showcase-kpi .k-val.green { color: #168030; }
+
+      .showcase-chart-box {
+        padding: 12px 14px 10px;
+        border-radius: 14px;
+        background: linear-gradient(180deg, #f8f9fc 0%, #ffffff 100%);
+        border: 1px solid var(--border);
+      }
+
+      .showcase-sim-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 14px;
+        border-radius: 12px;
+        background: var(--accent-soft);
+        border: 1px solid var(--accent-border);
+        font-size: 11.5px;
+      }
+
+      .showcase-sim-bar strong {
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .showcase-sim-pill {
+        font-family: "Geist Mono", monospace;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 4px 9px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #fff;
+        white-space: nowrap;
       }
 
       /* ── Slide fechamento ── */
@@ -1448,52 +1644,108 @@
 
         <div class="body cover">
           <div class="left cover-copy">
-            <h1 class="display">Fôlego <span class="hl">do Mês</span></h1>
-            <p class="cover-tagline">Antecipar o aperto. Dar tempo para agir.</p>
-            <p class="lead cover-lead">
-              Projeção determinística de liquidez que avisa quando o dinheiro disponível pode não cobrir
-              os próximos compromissos até o salário — com causa explicável, distinção de certeza e simulação sem risco.
-            </p>
-            <div class="pills" style="margin-top: 22px;">
-              <span class="pill green"><span class="dot"></span>Formação Devs Nativos em IA</span>
-              <span class="pill"><span class="dot"></span>Motor Determinístico · 7 Cenários</span>
+            <div class="cover-kicker">
+              <span class="k-dot"></span>
+              <span>Formação Devs Nativos em IA · Agibank 2026</span>
             </div>
-            <div class="signature cover-signature">
-              <span class="dot"></span>
-              <span>Apresentado por <span class="name">Miguel Fernandes Costacurta</span></span>
+
+            <h1 class="display">
+              Fôlego<br />
+              <span class="hl">do Mês.</span>
+            </h1>
+
+            <div class="cover-quote-bar">
+              <p class="cover-tagline">
+                Antecipar o aperto. <span>Dar tempo para agir.</span>
+              </p>
+            </div>
+
+            <p class="lead cover-lead">
+              Uma camada inteligente de previsibilidade financeira que avisa quando o saldo disponível pode não cobrir os compromissos até o próximo salário — combinando <strong>motor determinístico</strong> e <strong>simulação em 1 toque</strong>.
+            </p>
+
+            <div class="cover-author-dock">
+              <div class="cover-author-card">
+                <div class="cover-avatar" aria-hidden="true">MC</div>
+                <div class="cover-author-meta">
+                  <span class="lbl">Candidato · Autor do Case</span>
+                  <span class="nm">Miguel Fernandes Costacurta</span>
+                </div>
+              </div>
+
+              <div class="pills">
+                <span class="pill green"><span class="dot"></span>Motor Determinístico + Gemini API</span>
+                <span class="pill"><span class="dot"></span>7 Cenários ao Vivo</span>
+              </div>
             </div>
           </div>
 
-          <div class="right">
-            <div class="orbit">
-              <svg viewBox="0 0 460 460" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="230" cy="230" r="210" stroke="rgba(0,100,253,0.12)" />
-                <circle cx="230" cy="230" r="150" stroke="rgba(0,100,253,0.16)" />
-                <circle cx="230" cy="230" r="90" stroke="rgba(47,199,80,0.2)" />
-                <circle cx="230" cy="230" r="54" fill="#ffffff" stroke="rgba(0,100,253,0.25)" stroke-width="2"/>
-                <line x1="80" y1="120" x2="180" y2="220" stroke="#0064fd" stroke-width="1.4" />
-                <line x1="80" y1="260" x2="180" y2="240" stroke="#0064fd" stroke-width="1.4" />
-                <line x1="120" y1="400" x2="200" y2="280" stroke="#2fc750" stroke-width="1.4" />
-                <line x1="290" y1="230" x2="420" y2="240" stroke="#0064fd" stroke-width="1.4" />
-                <circle cx="80" cy="120" r="3.5" fill="#0064fd" />
-                <circle cx="80" cy="260" r="3.5" fill="#0064fd" />
-                <circle cx="120" cy="400" r="3.5" fill="#2fc750" />
-                <circle cx="420" cy="240" r="4" fill="#0064fd" />
-                <text x="230" y="235" text-anchor="middle" font-family="Geist,sans-serif" font-size="13" font-weight="700" fill="#0064fd">Fôlego</text>
-              </svg>
-            </div>
-            <div class="orbit-tag" style="top: 12%; left: 4%;">
-              <span class="s">Ordem cronológica</span><span class="k">Datas &amp; Salário</span>
-            </div>
-            <div class="orbit-tag" style="top: 44%; left: 2%;">
-              <span class="s">Confirmado × Estimado</span><span class="k">Grau de Certeza</span>
-            </div>
-            <div class="orbit-tag" style="top: 72%; left: 8%;">
-              <span class="s">1 toque · sem risco real</span><span class="k">Simulador</span>
-            </div>
-            <div class="orbit-tag" style="top: 46%; right: 0; text-align: right;">
-              <span class="s">folego-do-mes.vercel.app</span>
-              <span class="k" style="color:var(--accent)">MVP em Produção</span>
+          <div class="cover-showcase">
+            <div class="showcase-window">
+              <div class="showcase-top">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:12px; font-weight:700; color:var(--text);">Pulso de Liquidez · Próximos 30 dias</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span class="showcase-badge">14/nov: −R$ 340</span>
+                  <span style="color:var(--muted-2); font-size:11px;">→</span>
+                  <span class="showcase-badge recovered">Simulado: +R$ 860</span>
+                </div>
+              </div>
+
+              <div class="showcase-kpis">
+                <div class="showcase-kpi">
+                  <span class="k-lbl">Saldo Livre Hoje</span>
+                  <span class="k-val">R$ 980,00</span>
+                </div>
+                <div class="showcase-kpi">
+                  <span class="k-lbl">1ª Insuficiência</span>
+                  <span class="k-val red">−R$ 340,00</span>
+                </div>
+                <div class="showcase-kpi">
+                  <span class="k-lbl">Após Simulação</span>
+                  <span class="k-val green">+R$ 860,00</span>
+                </div>
+              </div>
+
+              <div class="showcase-chart-box">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <span class="mono" style="font-size:9.5px; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted-2); font-weight:600;">Curva de Fôlego em Degraus (Antes × Depois da Simulação)</span>
+                  <span class="mono" style="font-size:9.5px; color:#168030; font-weight:700;">Zero Cheque Especial</span>
+                </div>
+                <svg viewBox="0 0 420 132" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <!-- Linha Zero -->
+                  <line x1="20" y1="86" x2="400" y2="86" stroke="rgba(21,26,40,0.22)" stroke-dasharray="4 4"/>
+                  <text x="24" y="80" font-family="Geist Mono,monospace" font-size="8.5" font-weight="600" fill="rgba(21,26,40,0.45)">LINHA ZERO (R$ 0)</text>
+
+                  <!-- Zona de déficit original -->
+                  <rect x="175" y="86" width="115" height="26" fill="rgba(224,69,69,0.1)" rx="3"/>
+
+                  <!-- Curva Original (Tracejada com queda em 14/nov) -->
+                  <path d="M 30 42 L 105 42 L 105 54 L 175 54 L 175 112 L 290 112 L 290 22 L 390 22" stroke="#e04545" stroke-width="2" stroke-dasharray="4 3" opacity="0.75"/>
+
+                  <!-- Curva Simulada Recuperada (Sólida Azul/Verde) -->
+                  <path d="M 30 42 L 105 42 L 105 54 L 290 54 L 290 18 L 390 18" stroke="#0064fd" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+
+                  <!-- Nós chave -->
+                  <circle cx="30" cy="42" r="4" fill="#fff" stroke="#0064fd" stroke-width="2.2"/>
+                  <circle cx="175" cy="112" r="4.5" fill="#e04545" stroke="#fff" stroke-width="1.8"/>
+                  <circle cx="175" cy="54" r="4.5" fill="#2fc750" stroke="#fff" stroke-width="1.8"/>
+                  <circle cx="290" cy="18" r="5" fill="#2fc750" stroke="#fff" stroke-width="2"/>
+
+                  <!-- Rótulos -->
+                  <text x="175" y="126" text-anchor="middle" font-family="Geist Mono,monospace" font-size="9.5" font-weight="700" fill="#e04545">14/nov (Aluguel −R$ 340)</text>
+                  <text x="210" y="45" text-anchor="middle" font-family="Geist Mono,monospace" font-size="9.5" font-weight="700" fill="#168030">Fôlego mantido (+R$ 860)</text>
+                  <text x="335" y="12" text-anchor="middle" font-family="Geist Mono,monospace" font-size="9.5" font-weight="700" fill="#0064fd">20/nov (+Salário)</text>
+                </svg>
+              </div>
+
+              <div class="showcase-sim-bar">
+                <div>
+                  <strong>Ação simulada:</strong> &ldquo;Aluguel pago por outro banco&rdquo; · sem alterar agendamentos reais
+                </div>
+                <span class="showcase-sim-pill">+R$ 1.200 de fôlego</span>
+              </div>
             </div>
           </div>
         </div>
