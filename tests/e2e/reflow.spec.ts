@@ -24,3 +24,18 @@ for (const [width,height] of [[320,640],[375,667],[390,844],[768,1024],[1024,768
     expect(applyBox.y+applyBox.height).toBeLessThanOrEqual(height+1);
   });
 }
+
+test('enlarged text at 200% retains the main financial controls',async({page})=>{
+  await page.setViewportSize({width:1440,height:900});
+  await page.goto('/?cenario=insuficiencia-confirmada');
+  await page.evaluate(()=>{document.documentElement.style.fontSize='32px';});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(1440);
+  await page.getByRole('button',{name:'Simular lançamento',exact:true}).click();
+  const dialog=page.getByRole('dialog');
+  const apply=dialog.getByRole('button',{name:'Adicionar à simulação'});
+  await apply.scrollIntoViewIfNeeded();
+  const box=(await apply.boundingBox())!;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x+box.width).toBeLessThanOrEqual(1440);
+  await expect(apply).toBeVisible();
+});

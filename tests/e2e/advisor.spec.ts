@@ -1,4 +1,8 @@
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+test.afterEach(async({page},testInfo)=>{
+  if(testInfo.status===testInfo.expectedStatus) await testInfo.attach('advisor-state',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
+});
 
 test('live response is identified and the prompt survives; offline takes status precedence',async({page,context})=>{
   await page.route('**/api/gemini',route=>route.fulfill({json:{text:'Seu saldo foi analisado com os dados enviados.\nConfira as próximas contas.',model:'gemini-mock',functionCalls:[]}}));
@@ -20,7 +24,7 @@ test('failed remote call produces one explicit local explanation',async({page})=
   await expect(page.getByTestId('advisor-status')).toHaveText('Resposta local · sem IA generativa');
 });
 
-test('request cannot apply tools to a different scenario or send twice',async({page})=>{
+test('request cannot apply tools to a different scenario or send twice',async({page},testInfo)=>{
   let release!:()=>void;
   const gate=new Promise<void>(resolve=>{release=resolve;});
   let calls=0;
@@ -29,6 +33,7 @@ test('request cannot apply tools to a different scenario or send twice',async({p
   await page.getByLabel('Pergunte ao consultor').fill('Diagnostique meu saldo');
   await page.getByLabel('Pergunte ao consultor').press('Enter');
   await expect(page.getByTestId('advisor-status')).toHaveText('Consultando');
+  await testInfo.attach('loading',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
   await expect(page.getByRole('button',{name:'Analisando...',exact:true})).toBeDisabled();
   await page.getByRole('button',{name:'Próximo cenário',exact:true}).click();
   release();
@@ -38,7 +43,7 @@ test('request cannot apply tools to a different scenario or send twice',async({p
   expect(calls).toBe(1);
 });
 
-test('context changes while pending are recoverable without losing the question',async({page})=>{
+test('context changes while pending are recoverable without losing the question',async({page},testInfo)=>{
   let release!:()=>void;
   const gate=new Promise<void>(resolve=>{release=resolve;});
   let first=true;
@@ -52,6 +57,8 @@ test('context changes while pending are recoverable without losing the question'
   await page.getByRole('button',{name:'Aplicar',exact:true}).click();
   release();
   await expect(page.getByRole('alert')).toContainText('pergunta foi preservada');
+  await testInfo.attach('recoverable-error',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
+  expect((await new AxeBuilder({page}).withTags(['wcag2a','wcag2aa','wcag21aa','wcag22aa']).analyze()).violations).toEqual([]);
   await page.getByRole('button',{name:'Tentar novamente',exact:true}).click();
   await expect(page.getByRole('log')).toContainText('Análise atualizada e recuperada');
   await expect(page.getByLabel('Pergunte ao consultor')).toHaveValue('Analise minhas contas');
@@ -66,4 +73,14 @@ test('invalid remote monetary tools cannot corrupt the financial store',async({p
   await expect(page.getByTestId('advisor-status')).toHaveText('Resposta local · sem IA generativa');
   await expect(page.getByRole('main')).toBeVisible();
   expect(errors).toEqual([]);
+});
+
+test('a stalled remote request times out into the local response',async({page,isMobile})=>{
+  test.skip(isMobile,'Timeout logic is shared; local response UI is covered on both viewports.');
+  test.setTimeout(25_000);
+  await page.route('**/api/gemini',()=>{});
+  await page.goto('/');
+  await page.getByRole('button',{name:'Diagnosticar fôlego e plano de ação',exact:true}).click();
+  await expect(page.getByTestId('advisor-status')).toHaveText('Resposta local · sem IA generativa',{timeout:18_000});
+  await expect(page.getByRole('log')).toContainText('não é uma resposta gerada por IA');
 });

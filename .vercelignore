@@ -1,0 +1,7 @@
+.git
+node_modules
+artifacts
+playwright-report
+test-results
+polish-ui.md
+.env*

@@ -1,5 +1,17 @@
 # Fôlego do Mês — Inteligência Preditiva de Liquidez e Cobertura Financeira
 
+Validação e histórico do polish de UI: [registro de execução](docs/ui-baseline/README.md).
+
+```sh
+npm run check         # typecheck app/API/testes, ESLint, Vitest e build
+npm run check:bundle  # orçamento do JavaScript inicial
+npx playwright install chromium
+npm run test:e2e      # jornadas, teclado, cenários, IA mockada e axe
+npm run test:visual   # compara os baselines revisados; não os atualiza
+```
+
+O CI executa a suíte completa em Windows/Chromium, preserva relatórios e coleta auditoria de reflow/axe e Lighthouse. Os baselines visuais são de Windows para manter a mesma renderização de fontes; novas referências devem ser revisadas antes de usar `npm run test:visual:update`. Leitores de tela e dispositivos físicos continuam sujeitos a validação humana.
+
 > **Processo Seletivo — Formação de Devs Nativos em IA do Agibank**  
 > Aplicação web responsiva (Mobile-First & Desktop Editorial) com motor financeiro determinístico em centavos inteiros, 7 cenários demonstrativos interativos e simulador de fôlego de caixa em tempo real.
 

@@ -67,6 +67,32 @@ Lighthouse: Chromium Playwright, production preview local, uma execução mobile
 - Onda 4: fonte/data/unidade por módulo; gráfico com heading, resumo de risco, seletor por teclado e tabela com cabeçalhos; gráfico precede o consultor. Context Pack passa a usar saldo efetivo simulado e representar ausência como “Dado indisponível”. Revisão independente encontrou curva original de zeros técnicos quando base era insuficiente: removida do domínio/render e coberta por teste. Explicação contempla entradas estimadas. Quatro E2E de gráficos, 14 de reflow e 24 testes Vitest aprovados. Capturas `artifacts/ui/wave4`.
 - Onda 5: política explícita de resposta única por consulta/cenário, pergunta preservada, lock síncrono, cancelamento e contexto conferido antes de aplicar tools; erro com retry, log sem leitura palavra a palavra e anúncio sucinto. Nenhum autoscroll foi adicionado. Status atual distingue aguardando/consultando/local/última resposta Gemini/sem conexão/erro. Timeout de 15s por tentativa remota e SDK carregado sob demanda; JS inicial caiu de ~904KB para ~491KB (não confundir com transferência gzip). Revisão independente reproduziu uma tool monetária extrema derrubando o render: o lote inteiro agora valida valores e datas antes da primeira mutação. Testes live mock/fallback/offline/cancelamento/retry/tool inválida em desktop/mobile; capturas `artifacts/ui/wave5`.
 - Onda 6: guia demo no fluxo, recolhimento persistido, saída/retomada preservando query params; motion reduzido no JS e CSS; marcos do gráfico focam heading da data; histórico restaura cenário. Revisão independente reproduziu perda de simulações ao voltar só uma âncora e rascunho aberto após mudar cenário no histórico: ambos corrigidos com comparação de cenário e fechamento dos painéis. Dez E2E de demo/histórico/reduced motion e seis de shell passaram. Capturas `artifacts/ui/wave6`. Régua D-90/FAB do outro produto permanecem N/A.
+- Onda 7: ESLint real e typecheck separados (app, API e testes), 31 testes Vitest com sete snapshots de métricas/séries/elegibilidade, suíte completa com 66 casos aprovados e dez exclusões intencionais (nove duplicações de baselines no segundo projeto e um timeout mobile compartilhado). Nove baselines visuais Windows/Chromium: quatro viewports e cinco estados mobile. Timeout remoto de 15s, inspector e erro recuperável também testados. Revisão independente pediu baselines dos estados e coleta de auditoria/Lighthouse no CI: incluídos. Um `pre` rolável não focável foi detectado no novo axe e corrigido. Fontes exatas do baseline passam a ser locais/preloaded com licenças após Lighthouse atribuir CLS 0,105 à troca tardia de web fonts. Capturas em `artifacts/ui/after`, `playwright-report` e nove PNGs versionados (~871KB ao todo).
+
+## Resultado mensurado localmente
+
+Resultados de laboratório no production preview, não indicadores p75 de usuários reais. Dados completos: [antes](before.json) e [depois](after.json).
+
+| Medida | Antes | Depois |
+| --- | --- | --- |
+| Cenários × viewports auditados | 35 | 35 |
+| Casos com overflow global | 14 | 0 |
+| Regras axe com violações | 3 | 0 |
+| Erros JavaScript nas capturas | 0 | 0 |
+| Lighthouse acessibilidade mobile/desktop | 96 / 96 | 100 / 100 |
+| Lighthouse performance mobile/desktop | 78 / 99 | 92 / 99 |
+| LCP mobile | 3,19 s | 2,17 s |
+| CLS mobile | 0 | 0,00035 |
+| TBT mobile (não é INP) | 299 ms | 284 ms |
+| JavaScript inicial / gzip | 900,68 / 222,66 KB | 494,63 / 152,40 KB |
+
+Orçamento determinístico no CI: JS inicial <=550KB e gzip <=180KB. Lighthouse é coletado como evidência; suas notas variam com a máquina/rede. O CI gera um único relatório Playwright completo e anexa auditoria/Lighthouse por 14 dias. A fonte local elimina a dependência de rede do Google Fonts nos testes visuais. `src/domain` e `src/data` foram comparados ao SHA inicial e permanecem idênticos.
+
+Entregas feitas por commits sequenciais em `main` e push por onda, conforme solicitado; não foram abertos PRs de merge para commits já publicados. Aceite visual humano e os requisitos exclusivamente do AgiPulse não são declarados concluídos.
+
+## Publicação
+
+Projeto e scope novamente conferidos antes do deploy. A publicação final será registrada após a validação do build remoto e a promoção do mesmo deployment testado. `polish-ui.md`, credenciais e artefatos locais estão excluídos também do upload da CLI por `.vercelignore`.
 
 ## Pendências de aceite humano
 

@@ -56,11 +56,7 @@ export const CommitmentsLedger: React.FC<CommitmentsLedgerProps> = ({
   const { dailySeries, evaluatedEntries, metrics } = activeProjection;
 
   const originalEntriesById = useMemo(() => {
-    const map = new Map<string, (typeof activeScenario.entries)[number]>();
-    for (const e of activeScenario.entries) {
-      map.set(e.id, e);
-    }
-    return map;
+    return new Map(activeScenario.entries.map(entry => [entry.id, entry]));
   }, [activeScenario.entries]);
 
   const nextSalaryDate: ISODateString | null = useMemo(() => {

@@ -1,0 +1,55 @@
+name: UI quality
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ui-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  quality:
+    # Match the reviewed Windows Chromium visual baselines.
+    runs-on: windows-latest
+    timeout-minutes: 20
+    env:
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npm run check
+      - run: npm run check:bundle
+      - name: E2E, accessibility and visual regression
+        run: npx playwright test
+      - name: Collect browser and Lighthouse evidence
+        shell: pwsh
+        run: |
+          $previewProcess = Start-Process -FilePath 'cmd.exe' -ArgumentList '/c npm run preview -- --host 127.0.0.1 --port 4173 --strictPort' -WindowStyle Hidden -PassThru
+          try {
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 60; $attempt++) {
+              try { Invoke-WebRequest 'http://127.0.0.1:4173' -UseBasicParsing | Out-Null; $ready = $true; break } catch { Start-Sleep -Milliseconds 500 }
+            }
+            if (-not $ready) { throw 'Preview did not become ready' }
+            $env:AUDIT_PHASE = 'ci-after'
+            npm run audit:ui
+            if ($LASTEXITCODE -ne 0) { throw 'UI audit failed' }
+            npm run audit:performance
+            if ($LASTEXITCODE -ne 0) { throw 'Lighthouse failed' }
+          } finally { taskkill /PID $previewProcess.Id /T /F | Out-Null }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: ui-evidence
+          path: |
+            playwright-report
+            test-results
+            artifacts
+          retention-days: 14

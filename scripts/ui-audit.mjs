@@ -23,7 +23,7 @@ const scenarioIds = await page.evaluate(async () => {
 // Stable IDs are also the public deep-link contract.
 const { readFile } = await import('node:fs/promises');
 const scenarioSource = await readFile('src/data/scenarios.ts', 'utf8');
-scenarioIds.push(...[...scenarioSource.matchAll(/^    id: '([^']+)'/gm)].map(match => match[1]));
+scenarioIds.push(...[...scenarioSource.matchAll(/^ {4}id: '([^']+)'/gm)].map(match => match[1]));
 if (scenarioIds.length !== 7) throw new Error(`Expected seven scenarios, found ${scenarioIds.length}`);
 const results = [];
 for (const [width, height] of [[1440,900],[1280,800],[768,1024],[390,844],[320,640]]) {
@@ -43,4 +43,7 @@ await page.screenshot({ path: `${folder}/slides-320.png`, fullPage: true });
 await writeFile(`${folder}/report.json`, JSON.stringify({ date:new Date().toISOString(), baseURL, errors, consoleErrors, httpErrors, results }, null, 2));
 console.log(JSON.stringify({ folder, screenshots:results.length+1, overflow:results.filter(r=>r.layout.scrollWidth>r.layout.width).length, violations:[...new Set(results.flatMap(r=>r.violations.map(v=>v.id)))], errors },null,2));
 await browser.close();
+if (phase !== 'before' && (errors.length || results.some(result=>result.layout.scrollWidth>result.layout.width || result.violations.length))) {
+  process.exitCode=1;
+}
 

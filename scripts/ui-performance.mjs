@@ -14,6 +14,7 @@ try {
     },desktop ? desktopConfig : undefined);
     const name = desktop?'desktop':'mobile';
     await writeFile(`${folder}/lighthouse-${name}.html`,result.report);
+    await writeFile(`${folder}/lighthouse-${name}-full.json`,JSON.stringify(result.lhr));
     const summary = {categories:Object.fromEntries(Object.entries(result.lhr.categories).map(([key,value])=>[key,value.score])),metrics:Object.fromEntries(['first-contentful-paint','largest-contentful-paint','cumulative-layout-shift','total-blocking-time','speed-index'].map(key=>[key,result.lhr.audits[key].numericValue]))};
     await writeFile(`${folder}/lighthouse-${name}.json`,JSON.stringify(summary,null,2));
     console.log(name,JSON.stringify(summary));

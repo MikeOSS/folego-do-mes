@@ -77,7 +77,7 @@ export const GeminiCopilotCard: React.FC = () => {
     setLastPrompt('');
     setAnnouncement(`Cenário de ${activeScenario.personaName}. Faça uma nova consulta sobre estes dados fictícios.`);
     return () => requestRef.current?.abort();
-  }, [activeScenario.id]);
+  }, [activeScenario.id, activeScenario.personaName]);
 
   useEffect(()=>{
     const update = () => setOnline(navigator.onLine);
@@ -282,7 +282,7 @@ export const GeminiCopilotCard: React.FC = () => {
             </span>
             <span>Cálculo financeiro pelo motor</span>
           </div>
-          <pre className="font-mono-tabular text-xs leading-relaxed overflow-x-auto max-h-52 text-slate-300">
+          <pre tabIndex={0} role="region" aria-label="Context Pack atual em JSON" className="font-mono-tabular text-xs leading-relaxed overflow-x-auto max-h-52 text-slate-300">
             {JSON.stringify(contextPack, null, 2)}
           </pre>
         </div>
