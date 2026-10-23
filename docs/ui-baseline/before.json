@@ -1,0 +1,47 @@
+{
+  "date": "2026-10-23T21:55:09.972Z",
+  "baseURL": "http://127.0.0.1:4173",
+  "cases": 35,
+  "overflowCases": 14,
+  "maxScrollWidth": 85,
+  "violations": [
+    "color-contrast",
+    "nested-interactive",
+    "target-size"
+  ],
+  "jsErrors": [],
+  "consoleErrors": [],
+  "httpErrors": [],
+  "lighthouse": {
+    "mobile": {
+      "categories": {
+        "performance": 0.78,
+        "accessibility": 0.96,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "first-contentful-paint": 3039.8086000000003,
+        "largest-contentful-paint": 3193.6753000000003,
+        "cumulative-layout-shift": 0,
+        "total-blocking-time": 298.99999999999955,
+        "speed-index": 4790.655311953784
+      }
+    },
+    "desktop": {
+      "categories": {
+        "performance": 0.99,
+        "accessibility": 0.96,
+        "best-practices": 1,
+        "seo": 0.92
+      },
+      "metrics": {
+        "first-contentful-paint": 731.9341499999999,
+        "largest-contentful-paint": 731.9341499999999,
+        "cumulative-layout-shift": 0.001764195752539243,
+        "total-blocking-time": 0,
+        "speed-index": 731.9341499999999
+      }
+    }
+  }
+}

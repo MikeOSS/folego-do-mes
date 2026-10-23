@@ -5,6 +5,10 @@ dist-ssr
 .vercel
 .DS_Store
 coverage
+artifacts/
+playwright-report/
+test-results/
+polish-ui.md
 
 .vercel
 .env*
