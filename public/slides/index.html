@@ -1822,9 +1822,9 @@
             </div>
             <div class="card">
               <span class="tag">05</span>
-              <h3>7 Cenários Ao Vivo</h3>
-              <p>Troca instantânea entre 7 casos de teste: aperto confirmado, risco estimado, duplicidade, incerteza e sem dados.</p>
-              <span class="route">src/data/scenarios.ts</span>
+              <h3>Copiloto Gemini API</h3>
+              <p>IA embarcada (<span class="mono">gemini-2.5-flash</span>) sobre Context Pack fechado e Function Calling para simular em linguagem natural.</p>
+              <span class="route">GeminiCopilotCard.tsx</span>
             </div>
             <div class="card" style="border-color: var(--green); background: var(--green-soft);">
               <span class="tag">22 Testes</span>
@@ -2051,7 +2051,7 @@
               </div>
               <div class="wf-step">
                 <span class="wf-num">✓</span>
-                <div><strong>Quando a IA entra no futuro?</strong> Apenas após provar a utilidade do cálculo básico, para sugerir estimativas com confirmação do usuário.</div>
+                <div><strong>Arquitetura Híbrida (Motor + Gemini API):</strong> a matemática roda em centavos inteiros no motor determinístico, e o <span class="mono">gemini-2.5-flash</span> lê o Context Pack fechado para explicar e acionar simulações via <em>Function Calling</em>.</div>
               </div>
             </div>
           </div>
@@ -2218,6 +2218,7 @@
               <span class="rail-chip mono">Inteiros em Centavos (Cents)</span>
               <span class="rail-chip mono">Datas ISO YYYY-MM-DD</span>
               <span class="rail-chip mono">React 19 + Vite + Tailwind 4</span>
+              <span class="rail-chip mono">@google/genai (gemini-2.5-flash)</span>
               <span class="rail-chip mono">Vitest (22 testes passando)</span>
             </div>
 
@@ -2254,7 +2255,7 @@
                 </div>
                 <div class="col-item"><span class="dot"></span><span><strong>Patches Não-Destrutivos:</strong> simulações gravam em <span class="mono">entryOverrides</span> sem mutar o cenário base.</span></div>
                 <div class="col-item"><span class="dot"></span><span><strong>Simulation Delta:</strong> compara em tempo real o ganho de fôlego (<span class="mono">+R$</span>) e dias ganhos.</span></div>
-                <div class="col-item"><span class="dot"></span><span><strong>Curva em Degraus SVG:</strong> geometria fiel a saldos bancários discretos.</span></div>
+                <div class="col-item"><span class="dot"></span><span><strong>Copiloto Gemini (Function Calling):</strong> traduz comandos naturais em chamadas de ferramenta sobre o simulador, lendo o <span class="mono">Context Pack</span> fechado sem inventar números.</span></div>
                 <div class="col-item"><span class="dot"></span><span><strong>Aviso de Encargos:</strong> alerta automático se <span class="mono">effectiveDate &gt; dueDate</span>.</span></div>
               </div>
             </div>

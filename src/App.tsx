@@ -4,6 +4,7 @@ import { FinancialStoreProvider, useFinancialStore } from './state/useFinancialS
 import { TopDemoRibbon } from './components/TopDemoRibbon';
 import { PulseHeroCard } from './components/PulseHeroCard';
 import { LiquidityStepChart } from './components/LiquidityStepChart';
+import { GeminiCopilotCard } from './components/GeminiCopilotCard';
 import { CommitmentsLedger } from './components/CommitmentsLedger';
 import { SimulatorSheet } from './components/SimulatorSheet';
 
@@ -80,8 +81,9 @@ const MainWorkspace: React.FC = () => {
             </aside>
           </div>
 
-          {/* Coluna Direita: Curva de Evolução do Saldo + Extrato Projetado */}
+          {/* Coluna Direita: Copiloto Gemini (Function Calling) + Curva de Evolução + Extrato Projetado */}
           <div className="lg:col-span-7 space-y-6">
+            <GeminiCopilotCard />
             <LiquidityStepChart />
             <CommitmentsLedger onOpenNewEntryModal={() => setIsCreatingNew(true)} />
           </div>
