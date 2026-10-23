@@ -159,7 +159,7 @@ export const LiquidityStepChart: React.FC = () => {
         <h2 className="text-base sm:text-lg font-semibold text-[#151a28]">
           Projeção aguardando confirmação de saldo
         </h2>
-        <p className="text-sm text-[rgba(21,26,40,0.62)] leading-relaxed">
+        <p className="text-sm text-muted leading-relaxed">
           Informe um saldo disponível no painel lateral para visualizar a evolução dia a dia
           dos próximos compromissos.
         </p>
@@ -190,7 +190,7 @@ export const LiquidityStepChart: React.FC = () => {
               <span
                 className={`text-2xl sm:text-3xl font-bold tracking-tight ${
                   inspectedDay.closingProjectedCents < 0
-                    ? 'text-[#e04545]'
+                    ? 'text-danger'
                     : 'text-[#151a28]'
                 }`}
               >
@@ -200,7 +200,7 @@ export const LiquidityStepChart: React.FC = () => {
                 />
               </span>
 
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#f0f2f7] text-[12px] font-medium text-[rgba(21,26,40,0.72)]">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#f0f2f7] text-[12px] font-medium text-muted">
                 {inspectedDay.dayIndex === 0
                   ? 'Hoje'
                   : `${formatShortDatePT(inspectedDay.date)} · ${getWeekdayShortPT(
@@ -211,9 +211,9 @@ export const LiquidityStepChart: React.FC = () => {
           )}
 
           {inspectedDay && (
-            <p className="text-xs text-[rgba(21,26,40,0.58)] mt-1">
+            <p className="text-xs text-muted mt-1">
               {inspectedDay.intradayTimingRisk ? (
-                <span className="text-[#a36200] font-medium">
+                <span className="text-warning-ink font-medium">
                   Atenção ao horário: saídas do dia superam o saldo da manhã (mínimo{' '}
                   {formatBRL(inspectedDay.intradayMinCents)}) antes da entrada.
                 </span>
@@ -243,7 +243,7 @@ export const LiquidityStepChart: React.FC = () => {
         </div>
 
         {/* Legenda Minimalista */}
-        <div className="flex flex-wrap items-center gap-3 text-xs text-[rgba(21,26,40,0.6)]">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
           <span className="inline-flex items-center gap-1.5">
             <span className="w-3.5 h-0.5 bg-[#0064fd] rounded-full inline-block" />
             <span>Saldo projetado</span>
@@ -370,7 +370,7 @@ export const LiquidityStepChart: React.FC = () => {
             x={SVG_WIDTH - PAD_RIGHT + 8}
             y={chartGeometry.zeroY + 3.5}
             fill="rgba(21,26,40,0.45)"
-            className="font-mono-tabular text-[10px] font-medium"
+            className="font-mono-tabular text-xs font-medium"
           >
             R$ 0
           </text>
@@ -462,7 +462,7 @@ export const LiquidityStepChart: React.FC = () => {
                 y={SVG_HEIGHT - 6}
                 textAnchor="middle"
                 fill="rgba(21,26,40,0.45)"
-                className="font-mono-tabular text-[10px]"
+                className="font-mono-tabular text-xs"
               >
                 {formatShortDatePT(day.date, 'numeric')}
               </text>
@@ -531,7 +531,7 @@ export const LiquidityStepChart: React.FC = () => {
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium shrink-0 transition-all cursor-pointer border ${
                   isSelected
                     ? 'bg-[#151a28] border-[#151a28] text-white'
-                    : 'bg-[#f8f9fc] border-[rgba(21,26,40,0.08)] text-[rgba(21,26,40,0.75)] hover:bg-[#f0f2f7]'
+                    : 'bg-[#f8f9fc] border-[rgba(21,26,40,0.08)] text-muted hover:bg-[#f0f2f7]'
                 }`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${dotClass}`} />
@@ -541,7 +541,7 @@ export const LiquidityStepChart: React.FC = () => {
                     isSelected
                       ? 'text-white'
                       : isNegative
-                        ? 'text-[#e04545]'
+                        ? 'text-danger'
                         : 'text-[#151a28]'
                   }`}
                 >

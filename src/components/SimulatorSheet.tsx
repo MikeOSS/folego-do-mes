@@ -174,7 +174,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
             {/* Cabeçalho Limpo e Luminoso */}
             <div className="px-5 py-4 flex shrink-0 items-center justify-between gap-2 border-b border-[#151a28]/8">
               <div className="min-w-0">
-                <span className="text-[11px] font-mono-tabular uppercase tracking-[0.12em] text-[#0064fd] font-semibold block">
+                <span className="text-xs font-mono-tabular uppercase tracking-[0.12em] text-brand font-semibold block">
                   {isCreatingNew
                     ? 'Simular Nova Movimentação'
                     : 'Simular Ajuste de Compromisso'}
@@ -193,15 +193,15 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                 type="button"
                 onClick={handleClose}
                 aria-label="Fechar painel de simulação"
-                className="p-2 rounded-full bg-[#f1f4f9] hover:bg-[#e6ebf3] text-[#525b6e] transition-colors cursor-pointer shrink-0"
+                className="p-2 rounded-full bg-[#f1f4f9] hover:bg-[#e6ebf3] text-muted transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Nota de Segurança e Escopo */}
-            <div className="px-5 py-2.5 shrink-0 bg-[#f8f9fc] border-b border-[#151a28]/6 flex items-start gap-2 text-xs text-[#525b6e]">
-              <Info className="w-3.5 h-3.5 text-[#0064fd] shrink-0 mt-0.5" />
+            <div className="px-5 py-2.5 shrink-0 bg-[#f8f9fc] border-b border-[#151a28]/6 flex items-start gap-2 text-xs text-muted">
+              <Info className="w-3.5 h-3.5 text-brand shrink-0 mt-0.5" />
               <span>
                 Alterações simuladas recalculam seu fôlego na hora, mas{' '}
                 <strong className="text-[#151a28]">
@@ -218,7 +218,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
               {/* Atalhos Rápidos de 1 Toque */}
               {!isCreatingNew && evaluatedTarget && (
                 <div className="space-y-2 pb-3.5 border-b border-[#151a28]/8">
-                  <span className="text-[11px] font-medium text-[#8891a5] block">
+                  <span className="text-xs font-medium text-muted block">
                     Testar decisão com 1 toque:
                   </span>
 
@@ -251,7 +251,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                             });
                             handleClose();
                           }}
-                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#0064fd]/10 hover:bg-[#0064fd]/16 text-[#0064fd] font-semibold text-xs transition-colors cursor-pointer"
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-[#0064fd]/10 hover:bg-[#0064fd]/16 text-brand font-semibold text-xs transition-colors cursor-pointer"
                         >
                           <Calendar className="w-3.5 h-3.5" />
                           <span>
@@ -272,7 +272,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                           });
                           handleClose();
                         }}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-amber-500/12 hover:bg-amber-500/20 text-[#b87810] font-semibold text-xs transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-amber-500/12 hover:bg-amber-500/20 text-warning-ink font-semibold text-xs transition-colors cursor-pointer"
                       >
                         <span>Reduzir gasto estimado em 50%</span>
                       </button>
@@ -295,7 +295,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                       className={`py-2 px-3 rounded-lg font-semibold text-xs transition-all cursor-pointer ${
                         type === 'outflow'
                           ? 'bg-white text-[#151a28] shadow-xs'
-                          : 'text-[#525b6e] hover:text-[#151a28]'
+                          : 'text-muted hover:text-[#151a28]'
                       }`}
                     >
                       Saída / Conta (−)
@@ -307,7 +307,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                       className={`py-2 px-3 rounded-lg font-semibold text-xs transition-all cursor-pointer ${
                         type === 'inflow'
                           ? 'bg-white text-[#168030] shadow-xs'
-                          : 'text-[#525b6e] hover:text-[#151a28]'
+                          : 'text-muted hover:text-[#151a28]'
                       }`}
                     >
                       Entrada / Recebimento (+)
@@ -373,7 +373,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
 
               {/* Aviso de Multa/Juros se postergar conta confirmada */}
               {previewLatePenalty && evaluatedTarget && (
-                <div className="p-3.5 rounded-xl bg-amber-500/8 border border-amber-500/20 flex items-start gap-2.5 text-xs text-[#b87810]">
+                <div className="p-3.5 rounded-xl bg-amber-500/8 border border-amber-500/20 flex items-start gap-2.5 text-xs text-warning-ink">
                   <AlertTriangle className="w-4 h-4 text-[#e8a020] shrink-0 mt-0.5" />
                   <div>
                     <strong className="text-[#151a28]">
@@ -461,7 +461,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
               </div>
 
               {/* Rodapé do Modal */}
-              {formError && <p id={`${formId}-error`} role="alert" className="text-sm text-[#c93535]">{formError}</p>}
+              {formError && <p id={`${formId}-error`} role="alert" className="text-sm text-danger">{formError}</p>}
               <div className="pt-4 border-t border-[#151a28]/8 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   {!isCreatingNew &&
@@ -487,7 +487,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                         removeSimulatedEntry(evaluatedTarget.entry.id);
                         handleClose();
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-rose-500/10 hover:bg-rose-500/18 text-[#c93535] text-xs font-semibold cursor-pointer"
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-rose-500/10 hover:bg-rose-500/18 text-danger text-xs font-semibold cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>Excluir</span>
@@ -499,7 +499,7 @@ export const SimulatorSheet: React.FC<SimulatorSheetProps> = ({
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="px-4 py-2 rounded-full text-[#525b6e] hover:text-[#151a28] hover:bg-[#f1f4f9] text-xs font-semibold transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-full text-muted hover:text-[#151a28] hover:bg-[#f1f4f9] text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Cancelar
                   </button>

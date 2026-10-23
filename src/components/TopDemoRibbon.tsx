@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AccessibleDialog } from './ui/AccessibleDialog';
+import { PRODUCT } from '../lib/product';
 import {
   ChevronDown,
   ChevronLeft,
@@ -24,11 +25,11 @@ const STATUS_LABEL_MAP: Record<AlertStatus, { label: string; style: string }> = 
   },
   CONDITIONAL_WARNING: {
     label: 'Aviso condicional',
-    style: 'bg-[#e8a020]/12 text-[#a36200] border-[#e8a020]/30',
+    style: 'bg-[#e8a020]/12 text-warning-ink border-[#e8a020]/30',
   },
   PREVENTIVE_ALERT: {
     label: 'Alerta preventivo',
-    style: 'bg-[#e04545]/10 text-[#c93333] border-[#e04545]/25',
+    style: 'bg-[#e04545]/10 text-danger border-[#e04545]/25',
   },
   INSUFFICIENT_DATA: {
     label: 'Dados insuficientes',
@@ -57,10 +58,10 @@ export const TopDemoRibbon: React.FC = () => {
             <a
               href="/"
               className="logo-tile inline-flex items-center rounded-[10px] px-2.5 py-1.5 shrink-0"
-              aria-label="Fôlego do Mês"
+              aria-label={PRODUCT.name}
             >
               <img
-                src="/brand/agibank-logo.svg"
+                src={PRODUCT.logo}
                 alt="Agibank"
                 className="h-5 w-auto block"
               />
@@ -69,14 +70,14 @@ export const TopDemoRibbon: React.FC = () => {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-[15px] font-bold tracking-tight text-[#151a28] truncate">
-                  Fôlego do Mês
+                  {PRODUCT.name}
                 </span>
-                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md border border-[rgba(21,26,40,0.08)] bg-white text-[10px] font-semibold uppercase tracking-[0.14em] text-[rgba(21,26,40,0.52)]">
+                <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-md border border-[rgba(21,26,40,0.08)] bg-white text-xs font-semibold uppercase tracking-[0.14em] text-muted">
                   Case 2026
                 </span>
               </div>
-              <p className="text-xs text-[rgba(21,26,40,0.56)] truncate hidden sm:block">
-                Antecipar o aperto. Dar tempo para agir.
+              <p className="text-xs text-muted truncate hidden sm:block">
+                {PRODUCT.tagline}
               </p>
             </div>
           </div>
@@ -89,7 +90,7 @@ export const TopDemoRibbon: React.FC = () => {
                 type="button"
                 onClick={() => stepScenario('prev')}
                 aria-label="Cenário anterior"
-                className="p-1.5 rounded-full hover:bg-[#f0f2f7] text-[rgba(21,26,40,0.62)] hover:text-[#151a28] transition-colors cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-[#f0f2f7] text-muted hover:text-[#151a28] transition-colors cursor-pointer"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
@@ -110,16 +111,16 @@ export const TopDemoRibbon: React.FC = () => {
                 />
                 <span className="text-xs font-semibold text-[#151a28] max-w-[140px] sm:max-w-[240px] truncate">
                   {activeScenario.personaName}
-                  <span className="font-normal text-[rgba(21,26,40,0.58)] hidden md:inline">
+                  <span className="font-normal text-muted hidden md:inline">
                     {' '}
                     · {activeScenario.title}
                   </span>
                 </span>
-                <span className="font-mono-tabular text-[10px] font-semibold text-[#0064fd] bg-[rgba(0,100,253,0.08)] px-1.5 py-0.5 rounded-full">
+                <span className="font-mono-tabular text-xs font-semibold text-brand bg-[rgba(0,100,253,0.08)] px-1.5 py-0.5 rounded-full">
                   {activeScenario.index}/{scenarios.length}
                 </span>
                 <ChevronDown
-                  className={`w-3.5 h-3.5 text-[rgba(21,26,40,0.5)] transition-transform duration-200 ${
+                  className={`w-3.5 h-3.5 text-muted transition-transform duration-200 ${
                     drawerOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -129,7 +130,7 @@ export const TopDemoRibbon: React.FC = () => {
                 type="button"
                 onClick={() => stepScenario('next')}
                 aria-label="Próximo cenário"
-                className="p-1.5 rounded-full hover:bg-[#f0f2f7] text-[rgba(21,26,40,0.62)] hover:text-[#151a28] transition-colors cursor-pointer"
+                className="p-1.5 rounded-full hover:bg-[#f0f2f7] text-muted hover:text-[#151a28] transition-colors cursor-pointer"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -139,7 +140,7 @@ export const TopDemoRibbon: React.FC = () => {
               <button
                 type="button"
                 onClick={resetAllSimulations}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(0,100,253,0.09)] hover:bg-[rgba(0,100,253,0.15)] border border-[rgba(0,100,253,0.24)] text-[#0064fd] text-xs font-semibold transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[rgba(0,100,253,0.09)] hover:bg-[rgba(0,100,253,0.15)] border border-[rgba(0,100,253,0.24)] text-brand text-xs font-semibold transition-colors cursor-pointer"
                 title="Restaurar dados originais do cenário"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -170,13 +171,13 @@ export const TopDemoRibbon: React.FC = () => {
                 type="button"
                 onClick={() => setDrawerOpen(false)}
                 aria-label="Fechar menu de cenários"
-                className="text-xs font-medium text-[#0064fd] hover:underline cursor-pointer"
+                className="text-xs font-medium text-brand hover:underline cursor-pointer"
               >
                 Fechar
               </button>
             </div>
 
-            <p className="text-sm text-[#525b6e]">Dados fictícios para demonstração. Escolha uma situação para testar.</p>
+            <p className="text-sm text-muted">Dados fictícios para demonstração. Escolha uma situação para testar.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pb-1">
               {scenarios.map((scen) => {
                 const isSelected = scen.id === activeScenario.id;
@@ -198,11 +199,11 @@ export const TopDemoRibbon: React.FC = () => {
                   >
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="font-mono-tabular text-[10px] font-semibold uppercase tracking-widest text-[rgba(21,26,40,0.45)]">
+                        <span className="font-mono-tabular text-xs font-semibold uppercase tracking-widest text-muted">
                           0{scen.index} · {scen.personaName}
                         </span>
                         <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border ${badge.style}`}
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${badge.style}`}
                         >
                           {badge.label}
                         </span>
@@ -210,7 +211,7 @@ export const TopDemoRibbon: React.FC = () => {
                       <p className="text-[13px] font-semibold text-[#151a28] leading-snug mb-1">
                         {scen.title}
                       </p>
-                      <p className="text-xs text-[rgba(21,26,40,0.6)] line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-muted line-clamp-2 leading-relaxed">
                         {scen.interviewHighlight}
                       </p>
                     </div>

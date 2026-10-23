@@ -7,6 +7,8 @@ import { LiquidityStepChart } from './components/LiquidityStepChart';
 import { GeminiCopilotCard } from './components/GeminiCopilotCard';
 import { CommitmentsLedger } from './components/CommitmentsLedger';
 import { SimulatorSheet } from './components/SimulatorSheet';
+import { Disclosure } from './components/ui/Disclosure';
+import { PRODUCT } from './lib/product';
 
 const MainWorkspace: React.FC = () => {
   const { activeProjection } = useFinancialStore();
@@ -26,24 +28,32 @@ const MainWorkspace: React.FC = () => {
             <PulseHeroCard onOpenNewEntryModal={() => setIsCreatingNew(true)} />
 
             {/* Card de Transparência do Motor Determinístico & Acesso aos Slides do Case */}
-            <aside className="surface-raised p-5 space-y-4 text-xs text-[#525b6e]">
-              <div className="flex items-center justify-between gap-2">
+            <aside className="surface-raised p-5 space-y-4 text-xs text-muted">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-[#168030] shrink-0" />
-                  <span className="font-semibold text-[#151a28]">
+                  <h2 className="text-base font-semibold text-[#151a28]">
                     Regras de proteção deste cálculo
-                  </span>
+                  </h2>
                 </div>
-                <span className="text-[10px] font-mono-tabular uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#f1f4f9] text-[#525b6e]">
+                <span className="text-xs font-mono-tabular px-2 py-0.5 rounded-full bg-[#f1f4f9] text-muted">
                   100% Determinístico
                 </span>
               </div>
 
-              <p className="leading-relaxed text-[#525b6e]">
+              <p className="leading-relaxed text-muted">
                 {activeProjection.scopeDisclaimer}
               </p>
+              <Disclosure title="Como a previsão é calculada">
+                <ol className="list-decimal pl-5 space-y-2">
+                  <li>Partimos do saldo livre, sem somar o cheque especial.</li>
+                  <li>Organizamos entradas e contas por data, retirando duplicidades identificadas.</li>
+                  <li>Comparamos o saldo diário com as despesas confirmadas, estimadas e os recebimentos incertos.</li>
+                  <li>Ao simular, mantemos a base para comparação. Nenhum pagamento real é realizado.</li>
+                </ol>
+              </Disclosure>
 
-              <div className="grid grid-cols-1 gap-2 pt-1 border-t border-[#151a28]/6 text-[11px]">
+              <div className="grid grid-cols-1 gap-2 pt-1 border-t border-[#151a28]/6 text-xs">
                 <div className="flex items-baseline gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#0064fd] shrink-0 translate-y-[-1px]" />
                   <span>
@@ -72,12 +82,12 @@ const MainWorkspace: React.FC = () => {
                     <span className="text-xs font-semibold text-[#151a28] block truncate">
                       Apresentação do Case · Fôlego do Mês
                     </span>
-                    <span className="text-[11px] text-[#525b6e] block truncate">
+                    <span className="text-xs text-muted block truncate">
                       Ver 15 slides interativos (Arquitetura, Produto e IA)
                     </span>
                   </div>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#0064fd] shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <ArrowUpRight className="w-4 h-4 text-brand shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </a>
             </aside>
           </div>
@@ -92,18 +102,17 @@ const MainWorkspace: React.FC = () => {
       </main>
 
       {/* Rodapé Discreto */}
-      <footer className="mt-10 border-t border-[#151a28]/7 bg-white/60 py-5 px-4 sm:px-6 text-xs text-[#8891a5]">
+      <footer className="mt-10 border-t border-[#151a28]/7 bg-white/60 py-5 px-4 sm:px-6 text-xs text-muted">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
           <p>
-            <strong className="text-[#525b6e]">Fôlego do Mês</strong> · Antecipar o aperto.
-            Dar tempo para agir. · Miguel Fernandes Costacurta
+            <strong className="text-muted">{PRODUCT.name}</strong> · {PRODUCT.tagline} · Miguel Fernandes Costacurta
           </p>
-          <div className="flex items-center gap-3 text-[11px]">
+          <div className="flex items-center gap-3 text-xs">
             <span>Protótipo funcional com dados fictícios</span>
             <span>·</span>
             <a
               href="/slides/index.html"
-              className="text-[#0064fd] font-medium hover:underline"
+              className="text-brand font-medium hover:underline"
             >
               Abrir Slides da Apresentação
             </a>

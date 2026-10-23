@@ -118,7 +118,7 @@ export const GeminiCopilotCard: React.FC = () => {
       {/* Cabeçalho do Consultor Gemini */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-[#0064fd]/10 border border-[#0064fd]/20 text-[#0064fd] flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-[#0064fd]/10 border border-[#0064fd]/20 text-brand flex items-center justify-center shrink-0">
             <Bot className="w-5 h-5" />
           </div>
           <div>
@@ -126,11 +126,11 @@ export const GeminiCopilotCard: React.FC = () => {
               <h2 className="text-base font-bold tracking-[-0.02em] text-[#151a28]">
                 Copiloto Gemini · Simulação Inteligente
               </h2>
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#0064fd]/10 text-[#0064fd] text-[10px] font-mono-tabular font-semibold">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#0064fd]/10 text-brand text-xs font-mono-tabular font-semibold">
                 Gemini quando disponível · modo local alternativo
               </span>
             </div>
-            <p className="text-xs text-[#525b6e]">
+            <p className="text-xs text-muted">
               Arquitetura híbrida: o motor calcula os centavos exatos e o Gemini explica ou executa simulações por comando natural.
             </p>
           </div>
@@ -141,10 +141,10 @@ export const GeminiCopilotCard: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowContextPack((prev) => !prev)}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium border transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
               showContextPack
                 ? 'bg-[#151a28] text-white border-[#151a28]'
-                : 'bg-[#f8f9fc] text-[#525b6e] border-[#151a28]/10 hover:text-[#151a28]'
+                : 'bg-[#f8f9fc] text-muted border-[#151a28]/10 hover:text-[#151a28]'
             }`}
             title="Inspecionar o pacote JSON fechado enviado ao Gemini para impedir alucinações"
           >
@@ -155,10 +155,10 @@ export const GeminiCopilotCard: React.FC = () => {
           <button
             type="button"
             onClick={() => setShowKeyModal((prev) => !prev)}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium border transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
               hasCustomKey
                 ? 'bg-[#2fc750]/12 text-[#168030] border-[#2fc750]/30'
-                : 'bg-[#f8f9fc] text-[#525b6e] border-[#151a28]/10 hover:text-[#151a28]'
+                : 'bg-[#f8f9fc] text-muted border-[#151a28]/10 hover:text-[#151a28]'
             }`}
             title="Configurar chave da API do Google Gemini (@google/genai)"
           >
@@ -182,12 +182,12 @@ export const GeminiCopilotCard: React.FC = () => {
               href="https://aistudio.google.com/apikey"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#0064fd] font-medium hover:underline"
+              className="text-brand font-medium hover:underline"
             >
               Gerar chave gratuita no AI Studio →
             </a>
           </div>
-          <p className="text-[#525b6e] leading-relaxed">
+          <p className="text-muted leading-relaxed">
             Se a variável <code className="font-mono-tabular">GEMINI_API_KEY</code> estiver configurada na Vercel ou se você colar sua chave aqui (salva apenas na aba atual), as chamadas usam <code className="font-mono-tabular">gemini-2.5-flash</code> ao vivo. Sem chave, o modo híbrido local garante funcionamento 100% contínuo na apresentação.
           </p>
           <div className="flex items-center gap-2">
@@ -211,13 +211,13 @@ export const GeminiCopilotCard: React.FC = () => {
       {/* Inspetor de Context Pack JSON (Transparência Técnica para a Banca) */}
       {showContextPack && (
         <div className="p-3.5 rounded-xl bg-[#151a28] text-slate-200 space-y-2 text-xs overflow-hidden">
-          <div className="flex items-center justify-between text-[11px] text-slate-400 border-b border-white/10 pb-2">
+          <div className="flex items-center justify-between text-xs text-slate-400 border-b border-white/10 pb-2">
             <span className="font-mono-tabular font-semibold text-[#2fc750]">
               CONTEXT PACK FECHADO · ENVIADO AO GEMINI-2.5-FLASH
             </span>
             <span>Cálculo financeiro pelo motor</span>
           </div>
-          <pre className="font-mono-tabular text-[11px] leading-relaxed overflow-x-auto max-h-52 text-slate-300">
+          <pre className="font-mono-tabular text-xs leading-relaxed overflow-x-auto max-h-52 text-slate-300">
             {JSON.stringify(contextPack, null, 2)}
           </pre>
         </div>
@@ -231,9 +231,9 @@ export const GeminiCopilotCard: React.FC = () => {
             type="button"
             disabled={isLoading}
             onClick={() => void handleRunPrompt(item.prompt)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f1f4f9] hover:bg-[#0064fd]/10 text-[#525b6e] hover:text-[#0064fd] text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#f1f4f9] hover:bg-[#0064fd]/10 text-muted hover:text-brand text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
           >
-            <Zap className="w-3 h-3 text-[#0064fd]" />
+            <Zap className="w-3 h-3 text-brand" />
             <span>{item.label}</span>
           </button>
         ))}
@@ -247,7 +247,7 @@ export const GeminiCopilotCard: React.FC = () => {
           onChange={(e) => setPromptInput(e.target.value)}
           disabled={isLoading}
           placeholder='Peça uma análise ou simule (ex: "Já paguei o aluguel em outro banco" ou "Adie para o dia do salário")...'
-          className="flex-1 min-w-0 w-full px-4 py-2.5 rounded-full border border-[#151a28]/12 bg-[#f8f9fc] focus:bg-white text-xs sm:text-sm text-[#151a28] placeholder:text-[#8891a5] focus:outline-none focus:border-[#0064fd] transition-colors"
+          className="flex-1 min-w-0 w-full px-4 py-2.5 rounded-full border border-[#151a28]/12 bg-[#f8f9fc] focus:bg-white text-xs sm:text-sm text-[#151a28] placeholder:text-muted focus:outline-none focus:border-[#0064fd] transition-colors"
         />
         <button
           type="submit"
@@ -285,7 +285,7 @@ export const GeminiCopilotCard: React.FC = () => {
                       <strong>{advisorResponse.mode === 'hybrid-local-engine' ? 'Simulação local executada:' : 'Função solicitada pela IA:'}</strong> {tool.summary}
                     </span>
                   </div>
-                  <span className="font-mono-tabular text-[10px] px-2 py-0.5 rounded bg-white/80 text-[#151a28]">
+                  <span className="font-mono-tabular text-xs px-2 py-0.5 rounded bg-white/80 text-[#151a28]">
                     {tool.toolName}()
                   </span>
                 </div>
@@ -296,10 +296,10 @@ export const GeminiCopilotCard: React.FC = () => {
           {/* Diagnóstico Principal */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-mono-tabular uppercase tracking-wider text-[#0064fd] font-semibold">
+              <span className="text-xs font-mono-tabular uppercase tracking-wider text-brand font-semibold">
                 Diagnóstico Baseado no Context Pack
               </span>
-              <span className="text-[10px] font-mono-tabular text-[#8891a5]">
+              <span className="text-xs font-mono-tabular text-muted">
                 {advisorResponse.modelUsed}
               </span>
             </div>
@@ -311,14 +311,14 @@ export const GeminiCopilotCard: React.FC = () => {
           {/* Plano de Ação Sugerido */}
           {advisorResponse.actionPlan.length > 0 && (
             <div className="space-y-1.5 pt-2 border-t border-[#151a28]/6">
-              <span className="text-[11px] font-semibold text-[#525b6e] block">
+              <span className="text-xs font-semibold text-muted block">
                 Recomendações e próximos passos:
               </span>
               <ul className="space-y-1.5">
                 {advisorResponse.actionPlan.map((step, idx) => (
                   <li
                     key={idx}
-                    className="flex items-start gap-2 text-xs text-[#525b6e] leading-relaxed"
+                    className="flex items-start gap-2 text-xs text-muted leading-relaxed"
                   >
                     <Check className="w-3.5 h-3.5 text-[#168030] shrink-0 mt-0.5" />
                     <span>{step}</span>
@@ -329,7 +329,7 @@ export const GeminiCopilotCard: React.FC = () => {
           )}
 
           {/* Nota de Governança */}
-          <div className="pt-2 border-t border-[#151a28]/6 text-[11px] text-[#8891a5] flex items-center justify-between gap-2">
+          <div className="pt-2 border-t border-[#151a28]/6 text-xs text-muted flex items-center justify-between gap-2">
             <span>{advisorResponse.riskDisclaimer}</span>
           </div>
         </div>

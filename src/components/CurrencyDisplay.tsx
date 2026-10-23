@@ -47,9 +47,9 @@ export const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
       className={`font-tabular inline-flex items-baseline whitespace-nowrap ${className}`}
     >
       {displaySign && <span className="mr-0.5">{displaySign}</span>}
-      <span className="text-[0.66em] font-semibold opacity-65 mr-1">R$</span>
+      <span className="[font-size:max(12px,0.66em)] font-semibold mr-1">R$</span>
       <span>{integerPart}</span>
-      <span className="text-[0.66em] font-semibold opacity-65">{decimalPart}</span>
+      <span className="[font-size:max(12px,0.66em)] font-semibold">{decimalPart}</span>
     </motion.span>
   );
 };

@@ -24,12 +24,12 @@ const STATUS_PILL_CONFIG: Record<
   CONDITIONAL_WARNING: {
     label: 'Aviso condicional · atenção às variáveis',
     dotClass: 'bg-[#e8a020]',
-    pillClass: 'bg-[#e8a020]/12 text-[#a36200] border-[#e8a020]/30',
+    pillClass: 'bg-[#e8a020]/12 text-warning-ink border-[#e8a020]/30',
   },
   PREVENTIVE_ALERT: {
     label: 'Alerta preventivo · saldo insuficiente antes do recebimento',
     dotClass: 'bg-[#e04545]',
-    pillClass: 'bg-[#e04545]/10 text-[#c93333] border-[#e04545]/25',
+    pillClass: 'bg-[#e04545]/10 text-danger border-[#e04545]/25',
   },
   INSUFFICIENT_DATA: {
     label: 'Informações insuficientes para conclusão segura',
@@ -102,7 +102,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
           <span>{pill.label}</span>
         </span>
 
-        <span className="text-xs text-[rgba(21,26,40,0.5)]">
+        <span className="text-xs text-muted">
           {effectiveSnapshot.accountLabel}
         </span>
       </div>
@@ -115,14 +115,14 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
           className="p-3.5 rounded-[12px] bg-[rgba(0,100,253,0.06)] border border-[rgba(0,100,253,0.22)] flex flex-col sm:flex-row sm:items-center justify-between gap-3"
         >
           <div className="text-xs text-[#151a28] space-y-0.5">
-            <p className="font-semibold text-[#0064fd]">
+            <p className="font-semibold text-brand">
               Modo simulação ativo ({simulationDelta.modifiedEntriesCount} ajuste(s)
               {simulationDelta.addedEntriesCount > 0
                 ? ` + ${simulationDelta.addedEntriesCount} novo(s)`
                 : ''}
               )
             </p>
-            <p className="text-[rgba(21,26,40,0.68)]">
+            <p className="text-muted">
               {simulationDelta.shortfallEliminated ? (
                 <span>
                   O déficit que ocorreria em{' '}
@@ -151,7 +151,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
           <button
             type="button"
             onClick={resetAllSimulations}
-            className="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-[#f0f2f7] border border-[rgba(0,100,253,0.24)] text-xs font-semibold text-[#0064fd] shrink-0 transition-colors cursor-pointer"
+            className="self-start sm:self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-[#f0f2f7] border border-[rgba(0,100,253,0.24)] text-xs font-semibold text-brand shrink-0 transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Restaurar original</span>
@@ -163,7 +163,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
       {alertStatus === 'INSUFFICIENT_DATA' ? (
         <div className="py-4 border-y border-[rgba(21,26,40,0.08)] space-y-3">
           <div className="label-caps">Saldo disponível não sincronizado</div>
-          <p className="text-sm text-[rgba(21,26,40,0.68)] leading-relaxed">
+          <p className="text-sm text-muted leading-relaxed">
             Para evitar falsos alertas de segurança, não emitimos previsão sem confirmar o
             saldo livre da conta.
           </p>
@@ -185,14 +185,14 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
               <span className="label-caps">
                 {isLowestNegative ? 'Maior falta projetada' : 'Menor saldo em 30 dias'}
               </span>
-              <span className="text-xs font-medium text-[rgba(21,26,40,0.55)]">
+              <span className="text-xs font-medium text-muted">
                 em {formatShortDatePT(metrics.lowestProjectedBalanceDate)}
               </span>
             </div>
 
             <div
               className={`text-3xl sm:text-4xl font-bold tracking-tight leading-none ${
-                isLowestNegative ? 'text-[#e04545]' : 'text-[#0064fd]'
+                isLowestNegative ? 'text-danger' : 'text-brand'
               }`}
             >
               <CurrencyDisplay
@@ -201,18 +201,18 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
               />
             </div>
 
-            <div className="mt-2 text-xs text-[rgba(21,26,40,0.58)]">
+            <div className="mt-2 text-xs text-muted">
               {simulationDelta.hasChanges &&
               baselineProjection.metrics.lowestProjectedBalanceCents !==
                 metrics.lowestProjectedBalanceCents ? (
                 <span>
                   Antes da simulação:{' '}
-                  <span className="line-through text-[rgba(21,26,40,0.45)]">
+                  <span className="line-through text-muted">
                     {formatBRL(baselineProjection.metrics.lowestProjectedBalanceCents)}
                   </span>
                 </span>
               ) : metrics.firstShortfallDate ? (
-                <span className="text-[#c93333] font-medium">
+                <span className="text-danger font-medium">
                   1ª insuficiência em {formatShortDatePT(metrics.firstShortfallDate)} (
                   {metrics.daysUntilShortfall === 0
                     ? 'hoje'
@@ -234,7 +234,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
               <button
                 type="button"
                 onClick={handleOpenBalanceEdit}
-                className="text-xs font-semibold text-[#0064fd] hover:underline cursor-pointer"
+                className="text-xs font-semibold text-brand hover:underline cursor-pointer"
               >
                 Alterar saldo
               </button>
@@ -243,7 +243,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
             {editingBalance ? (
               <form onSubmit={handleSaveBalance} className="space-y-2 mt-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs text-[rgba(21,26,40,0.5)]">R$</span>
+                  <span className="text-xs text-muted">R$</span>
                   <input
                     id={balanceId}
                     aria-label="Saldo disponível para simular (R$)"
@@ -267,7 +267,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
                   <button
                     type="button"
                     onClick={() => { setEditingBalance(false); setBalanceError(null); }}
-                    className="px-2.5 py-1 rounded-full bg-[#f0f2f7] text-[rgba(21,26,40,0.7)] text-xs cursor-pointer"
+                    className="px-2.5 py-1 rounded-full bg-[#f0f2f7] text-muted text-xs cursor-pointer"
                   >
                     Cancelar
                   </button>
@@ -282,7 +282,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
                     <span>—</span>
                   )}
                 </div>
-                <p className="mt-2 text-xs text-[rgba(21,26,40,0.52)]">
+                <p className="mt-2 text-xs text-muted">
                   Exclui {formatBRL(effectiveSnapshot.overdraftLimitCents)} de limite da conta
                 </p>
               </>
@@ -323,7 +323,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
       )}
 
       {/* Diagnóstico Humano e Direto */}
-      {balanceError && <p id={`${balanceId}-error`} role="alert" className="text-sm text-[#c93535]">{balanceError}</p>}
+      {balanceError && <p id={`${balanceId}-error`} role="alert" className="text-sm text-danger">{balanceError}</p>}
       <motion.div
         key={`${activeScenario.id}-${alertStatus}`}
         initial={{ opacity: 0, y: 4 }}
@@ -333,10 +333,10 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
         aria-atomic="true"
         className="space-y-2"
       >
-        <h1 className="text-lg sm:text-[19px] font-semibold text-[#151a28] leading-snug">
+        <h1 className="text-2xl sm:text-[28px] font-semibold text-[#151a28] leading-snug">
           {headline}
         </h1>
-        <p className="text-sm text-[rgba(21,26,40,0.65)] leading-relaxed">
+        <p className="text-sm text-muted leading-relaxed">
           {explanation}
         </p>
       </motion.div>
@@ -344,7 +344,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
       {/* Linha de Apoio: Próximo Recebimento & Total de Saídas */}
       {alertStatus !== 'INSUFFICIENT_DATA' && (
         <div className="pt-4 border-t border-[rgba(21,26,40,0.08)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1 text-xs text-[rgba(21,26,40,0.65)]">
+          <div className="space-y-1 text-xs text-muted">
             {metrics.nextExpectedInflow ? (
               <div>
                 Próxima entrada:{' '}
@@ -367,7 +367,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
               {metrics.totalEstimatedOutflowsCents > 0 && (
                 <span>
                   Recorrências estimadas:{' '}
-                  <strong className="text-[#a36200] font-tabular">
+                  <strong className="text-warning-ink font-tabular">
                     −{formatBRL(metrics.totalEstimatedOutflowsCents)}
                   </strong>
                 </span>
@@ -378,7 +378,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
           <button
             type="button"
             onClick={onOpenNewEntryModal}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-[rgba(0,100,253,0.08)] hover:bg-[rgba(0,100,253,0.14)] border border-[rgba(0,100,253,0.22)] text-[#0064fd] text-xs font-semibold transition-colors shrink-0 cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-full bg-[rgba(0,100,253,0.08)] hover:bg-[rgba(0,100,253,0.14)] border border-[rgba(0,100,253,0.22)] text-brand text-xs font-semibold transition-colors shrink-0 cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Simular lançamento</span>
@@ -392,7 +392,7 @@ export const PulseHeroCard: React.FC<PulseHeroCardProps> = ({
           {actionableHints.map((hint, idx) => (
             <p
               key={idx}
-              className="text-xs text-[rgba(21,26,40,0.66)] leading-relaxed flex items-start gap-2"
+              className="text-xs text-muted leading-relaxed flex items-start gap-2"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-[#0064fd] mt-1.5 shrink-0" />
               <span>{hint}</span>
